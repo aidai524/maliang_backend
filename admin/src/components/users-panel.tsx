@@ -217,7 +217,7 @@ export function UsersPanel({ onStatsChange }: UsersPanelProps) {
                       {user.phone || <span className="text-gray-400">未绑定</span>}
                     </TableCell>
                     <TableCell className="font-mono text-xs">
-                      {user.openid.slice(0, 12)}...
+                      {user.openid ? `${user.openid.slice(0, 12)}...` : <span className="text-gray-400">-</span>}
                     </TableCell>
                     <TableCell>
                       <Badge
