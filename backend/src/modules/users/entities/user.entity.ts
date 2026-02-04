@@ -18,19 +18,21 @@ export enum VipLevel {
 }
 
 @Entity('users')
-@Index('idx_users_openid', ['openid'], { unique: true })
-@Index('idx_users_phone', ['phone'])
+@Index('idx_users_openid', ['openid'], { unique: true, where: '"openid" IS NOT NULL' })
+@Index('idx_users_phone', ['phone'], { unique: true, where: '"phone" IS NOT NULL' })
 @Index('idx_users_vip_level', ['vipLevel'])
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ name: 'openid', length: 100, unique: true })
+  // 微信登录的用户有 openid，手机号注册的用户可能没有
+  @Column({ name: 'openid', length: 100, nullable: true })
   openid: string;
 
   @Column({ name: 'unionid', length: 100, nullable: true })
   unionid: string;
 
+  // 手机号注册的用户有 phone，微信登录的用户可能没有
   @Column({ name: 'phone', length: 20, nullable: true })
   phone: string;
 

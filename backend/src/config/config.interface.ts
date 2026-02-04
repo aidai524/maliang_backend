@@ -55,6 +55,14 @@ export interface Config {
     dailyLimitSvip: number;
   };
 
+  sms: {
+    mode: 'mock' | 'aliyun';
+    aliyunAccessKeyId: string;
+    aliyunAccessKeySecret: string;
+    aliyunSignName: string;
+    aliyunTemplateCode: string;
+  };
+
   cors: {
     origin: string;
   };

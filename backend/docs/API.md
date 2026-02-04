@@ -37,6 +37,9 @@ X-Admin-Key: <ADMIN_API_KEY>
 | 方法 | 路径 | 说明 | 认证 |
 |------|------|------|------|
 | POST | `/v1/auth/wechat-login` | 微信登录 | 无 |
+| POST | `/v1/auth/send-code` | 发送短信验证码 | 无 |
+| POST | `/v1/auth/phone-login` | 手机号登录/注册 | 无 |
+| POST | `/v1/auth/bind-phone` | 绑定手机号 | JWT |
 | POST | `/v1/auth/refresh-token` | 刷新 Token | JWT |
 | GET | `/v1/auth/userinfo` | 获取用户信息 | JWT |
 | GET | `/v1/auth/check` | 检查登录状态 | JWT |
@@ -47,6 +50,25 @@ X-Admin-Key: <ADMIN_API_KEY>
 |------|------|------|------|
 | GET | `/v1/users/me` | 获取当前用户 | JWT |
 | GET | `/v1/users/me/stats` | 获取用户统计 | JWT |
+
+### 生成任务模块 (Jobs) - 本地记录
+
+| 方法 | 路径 | 说明 | 认证 |
+|------|------|------|------|
+| POST | `/v1/jobs` | 创建生成任务 | JWT |
+| GET | `/v1/jobs` | 获取任务列表 | JWT |
+| GET | `/v1/jobs/quota` | 获取配额信息 | JWT |
+| GET | `/v1/jobs/:jobId` | 获取任务详情 | JWT |
+| DELETE | `/v1/jobs/:jobId` | 取消任务 | JWT |
+
+### 代理模块 (Proxy) - 第三方 AI 服务
+
+| 方法 | 路径 | 说明 | 认证 |
+|------|------|------|------|
+| POST | `/v1/proxy/images/generate` | 生成图片 | JWT |
+| GET | `/v1/proxy/jobs` | 获取任务列表 | JWT |
+| GET | `/v1/proxy/jobs/:jobId` | 获取任务详情 | JWT |
+| DELETE | `/v1/proxy/jobs/:jobId` | 取消任务 | JWT |
 
 ### VIP 模块 (VIP)
 
@@ -64,15 +86,6 @@ X-Admin-Key: <ADMIN_API_KEY>
 | GET | `/v1/orders` | 获取订单列表 | JWT |
 | GET | `/v1/orders/:orderId` | 获取订单详情 | JWT |
 | POST | `/v1/orders/payment-callback` | 支付回调 | 无 |
-
-### 代理模块 (Proxy) - 图片生成
-
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| POST | `/v1/proxy/images/generate` | 生成图片 | JWT |
-| GET | `/v1/proxy/jobs` | 获取任务列表 | JWT |
-| GET | `/v1/proxy/jobs/:jobId` | 获取任务详情 | JWT |
-| DELETE | `/v1/proxy/jobs/:jobId` | 取消任务 | JWT |
 
 ### 收藏模块 (Favorites)
 
@@ -159,6 +172,116 @@ X-Admin-Key: <ADMIN_API_KEY>
 
 ## 详细接口文档
 
+### 发送短信验证码
+
+**POST** `/v1/auth/send-code`
+
+发送短信验证码到指定手机号，60秒内不能重复发送。
+
+**请求体：**
+```json
+{
+  "phone": "13800138000"
+}
+```
+
+**响应（开发模式）：**
+```json
+{
+  "success": true,
+  "message": "Verification code sent (mock mode)",
+  "code": "123456"
+}
+```
+
+**响应（生产模式）：**
+```json
+{
+  "success": true,
+  "message": "Verification code sent"
+}
+```
+
+**错误响应：**
+```json
+{
+  "statusCode": 400,
+  "message": "Please wait 60 seconds before requesting another code"
+}
+```
+
+---
+
+### 手机号登录/注册
+
+**POST** `/v1/auth/phone-login`
+
+使用手机号和验证码登录，如果用户不存在则自动注册。
+
+**请求体：**
+```json
+{
+  "phone": "13800138000",
+  "code": "123456",
+  "nickName": "可选昵称",
+  "avatarUrl": "可选头像URL"
+}
+```
+
+**响应：**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "expiresIn": "7d",
+  "user": {
+    "id": 1,
+    "phone": "13800138000",
+    "nickName": "用户8000",
+    "avatarUrl": null,
+    "vipLevel": "NORMAL",
+    "pointsBalance": 0,
+    "openid": null,
+    "createdAt": "2026-02-03T07:38:19.886Z"
+  }
+}
+```
+
+---
+
+### 绑定手机号
+
+**POST** `/v1/auth/bind-phone`
+
+将手机号绑定到当前登录的微信账号。如果手机号已被其他账号使用，会自动合并账号。
+
+**Headers：**
+```
+Authorization: Bearer <JWT_TOKEN>
+```
+
+**请求体：**
+```json
+{
+  "phone": "13800138000",
+  "code": "123456"
+}
+```
+
+**响应：**
+```json
+{
+  "success": true,
+  "user": {
+    "id": 1,
+    "phone": "13800138000",
+    "openid": "xxx",
+    "vipLevel": "VIP"
+  }
+}
+```
+
+---
+
 ### 微信登录
 
 **POST** `/v1/auth/wechat-login`
@@ -166,9 +289,10 @@ X-Admin-Key: <ADMIN_API_KEY>
 **请求体：**
 ```json
 {
-  "code": "微信登录 code",
-  "encryptedData": "加密数据（可选）",
-  "iv": "初始向量（可选）",
+  "code": "微信登录 code（必填）",
+  "phoneCode": "手机号授权 code（可选，新版方式）",
+  "encryptedData": "加密数据（可选，旧版方式）",
+  "iv": "初始向量（可选，旧版方式）",
   "userInfo": {
     "nickName": "昵称",
     "avatarUrl": "头像URL"
@@ -179,13 +303,183 @@ X-Admin-Key: <ADMIN_API_KEY>
 **响应：**
 ```json
 {
-  "accessToken": "jwt_token_here",
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "expiresIn": "7d",
   "user": {
     "id": 1,
     "openid": "xxx",
+    "unionid": "xxx",
+    "phone": "13800138000",
     "nickName": "用户昵称",
-    "vipLevel": "NORMAL"
+    "avatarUrl": "头像URL",
+    "vipLevel": "NORMAL",
+    "pointsBalance": 0
   }
+}
+```
+
+---
+
+### 获取用户统计
+
+**GET** `/v1/users/me/stats`
+
+**Headers：**
+```
+Authorization: Bearer <JWT_TOKEN>
+```
+
+**响应：**
+```json
+{
+  "user": {
+    "id": 1,
+    "nickName": "用户昵称",
+    "avatarUrl": "头像URL",
+    "vipLevel": "VIP",
+    "vipExpireAt": "2026-03-01T00:00:00Z",
+    "pointsBalance": 100
+  },
+  "stats": {
+    "totalFavorites": 10,
+    "totalOrders": 2,
+    "totalGenerations": 50,
+    "todayGenerations": 3,
+    "todayRemaining": 17,
+    "dailyLimit": 20
+  }
+}
+```
+
+---
+
+### 获取配额信息
+
+**GET** `/v1/jobs/quota`
+
+**Headers：**
+```
+Authorization: Bearer <JWT_TOKEN>
+```
+
+**响应：**
+```json
+{
+  "vipLevel": "VIP",
+  "dailyLimit": 20,
+  "todayUsed": 5,
+  "todayRemaining": 15,
+  "totalGenerations": 100
+}
+```
+
+**每日限额说明：**
+- `NORMAL`（普通用户）：2 张/天
+- `VIP`：20 张/天
+- `SVIP`：100 张/天
+
+---
+
+### 创建生成任务（本地）
+
+**POST** `/v1/jobs`
+
+创建图片生成任务，会自动检查每日配额，并记录到本地数据库。
+
+**Headers：**
+```
+Authorization: Bearer <JWT_TOKEN>
+```
+
+**请求体：**
+```json
+{
+  "prompt": "A cute cat",
+  "negativePrompt": "ugly, blurry",
+  "aspectRatio": "1:1",
+  "resolution": "1024x1024",
+  "model": "默认模型"
+}
+```
+
+**响应：**
+```json
+{
+  "jobId": "cmkuz35wf00034rk15ycgzvce",
+  "status": "QUEUED",
+  "generationId": 1
+}
+```
+
+**错误响应（超出配额）：**
+```json
+{
+  "statusCode": 403,
+  "message": "Daily limit reached (20/20)"
+}
+```
+
+---
+
+### 生成图片（代理到第三方）
+
+**POST** `/v1/proxy/images/generate`
+
+直接代理到第三方 AI 服务，不记录到本地数据库。
+
+**Headers：**
+```
+Authorization: Bearer <JWT_TOKEN>
+```
+
+**请求体：**
+```json
+{
+  "prompt": "A beautiful sunset over mountains",
+  "mode": "final",
+  "resolution": "2K",
+  "aspectRatio": "16:9"
+}
+```
+
+**响应：**
+```json
+{
+  "jobId": "cmkuz35wf00034rk15ycgzvce",
+  "status": "QUEUED"
+}
+```
+
+---
+
+### 获取任务列表（代理）
+
+**GET** `/v1/proxy/jobs`
+
+**Headers：**
+```
+Authorization: Bearer <JWT_TOKEN>
+```
+
+**Query 参数：**
+- `limit` - 每页数量（默认 20）
+- `cursor` - 分页游标
+
+**响应：**
+```json
+{
+  "items": [
+    {
+      "id": "cmkuz35wf00034rk15ycgzvce",
+      "status": "SUCCEEDED",
+      "prompt": "A cute cat",
+      "mode": "final",
+      "resultUrls": ["https://assets.xxx.com/xxx.png"],
+      "createdAt": "2026-02-04T07:15:39.632Z"
+    }
+  ],
+  "nextCursor": "xxx",
+  "hasMore": true
 }
 ```
 
@@ -304,29 +598,6 @@ Content-Type: application/json
 
 ---
 
-### 管理员取消 VIP
-
-**DELETE** `/v1/admin/users/:userId/vip`
-
-**Headers：**
-```
-X-Admin-Key: <ADMIN_API_KEY>
-```
-
-**响应：**
-```json
-{
-  "user": {
-    "id": 1,
-    "vipLevel": "NORMAL",
-    "vipExpireAt": null
-  },
-  "message": "VIP cancelled"
-}
-```
-
----
-
 ### 管理员统计
 
 **GET** `/v1/admin/stats`
@@ -349,53 +620,6 @@ X-Admin-Key: <ADMIN_API_KEY>
 
 ---
 
-### 创建提示词模板
-
-**POST** `/v1/templates/prompts`
-
-**Headers：**
-```
-X-Admin-Key: <ADMIN_API_KEY>
-Content-Type: application/json
-```
-
-**请求体：**
-```json
-{
-  "templateId": "template-001",
-  "title": "可爱猫咪",
-  "description": "生成可爱的猫咪图片",
-  "prompt": "A cute fluffy cat with big eyes...",
-  "category": "animals",
-  "thumbnailUrl": "https://xxx/thumb.jpg",
-  "previewImages": ["https://xxx/1.jpg", "https://xxx/2.jpg"],
-  "isHot": true
-}
-```
-
----
-
-### 更新模板
-
-**PUT** `/v1/templates/prompts/:templateId`
-
-**Headers：**
-```
-X-Admin-Key: <ADMIN_API_KEY>
-Content-Type: application/json
-```
-
-**请求体（所有字段可选）：**
-```json
-{
-  "title": "新标题",
-  "prompt": "新提示词",
-  "isHot": false
-}
-```
-
----
-
 ## 错误响应
 
 所有错误响应格式：
@@ -411,7 +635,7 @@ Content-Type: application/json
 **常见状态码：**
 - `400` - 请求参数错误
 - `401` - 未认证或认证失败
-- `403` - 无权限
+- `403` - 无权限或超出配额
 - `404` - 资源不存在
 - `429` - 请求过于频繁
 - `500` - 服务器内部错误
@@ -435,10 +659,26 @@ ADMIN_API_KEY=admin_secret_key_change_in_production
 # JWT 密钥
 JWT_SECRET=your-jwt-secret
 
+# 第三方 AI 服务
+THIRD_PARTY_API_BASE_URL=http://localhost:3001
+THIRD_PARTY_API_KEY=img_test_dev_123456789
+
 # R2 存储
 R2_ACCOUNT_ID=xxx
 R2_ACCESS_KEY_ID=xxx
 R2_SECRET_ACCESS_KEY=xxx
 R2_BUCKET_NAME=dream-wechat-assets
 R2_PUBLIC_BASE_URL=https://assets.xxx.com
+
+# 每日生成限额
+GENERATION_DAILY_LIMIT_NORMAL=2
+GENERATION_DAILY_LIMIT_VIP=20
+GENERATION_DAILY_LIMIT_SVIP=100
+
+# 短信服务
+SMS_MODE=mock
+ALIYUN_SMS_ACCESS_KEY_ID=
+ALIYUN_SMS_ACCESS_KEY_SECRET=
+ALIYUN_SMS_SIGN_NAME=
+ALIYUN_SMS_TEMPLATE_CODE=
 ```

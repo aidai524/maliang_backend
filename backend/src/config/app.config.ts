@@ -60,6 +60,15 @@ export default registerAs('app', (): Config => ({
     dailyLimitSvip: parseInt(process.env.GENERATION_DAILY_LIMIT_SVIP, 10) || 100,
   },
 
+  // 短信服务配置
+  sms: {
+    mode: (process.env.SMS_MODE as 'mock' | 'aliyun') || 'mock',
+    aliyunAccessKeyId: process.env.ALIYUN_SMS_ACCESS_KEY_ID || '',
+    aliyunAccessKeySecret: process.env.ALIYUN_SMS_ACCESS_KEY_SECRET || '',
+    aliyunSignName: process.env.ALIYUN_SMS_SIGN_NAME || '',
+    aliyunTemplateCode: process.env.ALIYUN_SMS_TEMPLATE_CODE || '',
+  },
+
   cors: {
     origin: process.env.CORS_ORIGIN || '*',
   },

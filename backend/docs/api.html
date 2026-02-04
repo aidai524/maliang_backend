@@ -3,617 +3,478 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dream WeChat Backend API Tester</title>
+  <title>Dream API 测试工具</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { 
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #f5f5f5;
-      color: #333;
-      line-height: 1.6;
-    }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
     .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-    header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      padding: 30px 20px;
-      margin-bottom: 20px;
-      border-radius: 10px;
-    }
-    header h1 { font-size: 24px; margin-bottom: 10px; }
-    header p { opacity: 0.9; }
-    
-    .config-panel {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    .config-panel h2 { font-size: 16px; margin-bottom: 15px; color: #667eea; }
-    .config-row { display: flex; gap: 15px; flex-wrap: wrap; }
-    .config-item { flex: 1; min-width: 250px; }
-    .config-item label { display: block; font-size: 12px; color: #666; margin-bottom: 5px; }
-    .config-item input {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      font-size: 14px;
-    }
-    
-    .api-section {
-      background: white;
-      border-radius: 10px;
-      margin-bottom: 15px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      overflow: hidden;
-    }
-    .api-section h3 {
-      background: #f8f9fa;
-      padding: 15px 20px;
-      font-size: 14px;
-      border-bottom: 1px solid #eee;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .api-section h3:hover { background: #f0f0f0; }
-    .api-section h3 .badge {
-      font-size: 11px;
-      padding: 3px 8px;
-      border-radius: 3px;
-      font-weight: normal;
-    }
-    .badge-get { background: #28a745; color: white; }
-    .badge-post { background: #007bff; color: white; }
-    .badge-put { background: #ffc107; color: #333; }
-    .badge-delete { background: #dc3545; color: white; }
-    .badge-admin { background: #6f42c1; color: white; margin-left: 5px; }
-    
-    .api-content { padding: 20px; display: none; }
-    .api-content.active { display: block; }
-    
-    .form-group { margin-bottom: 15px; }
-    .form-group label { display: block; font-size: 12px; color: #666; margin-bottom: 5px; }
-    .form-group input, .form-group textarea, .form-group select {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      font-size: 14px;
-      font-family: monospace;
-    }
-    .form-group textarea { min-height: 100px; resize: vertical; }
-    
-    .btn {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-    }
-    .btn-primary { background: #667eea; color: white; }
-    .btn-primary:hover { background: #5a6fd6; }
-    .btn-secondary { background: #6c757d; color: white; }
-    
-    .response-panel {
-      margin-top: 15px;
-      background: #1e1e1e;
-      border-radius: 5px;
-      overflow: hidden;
-    }
-    .response-header {
-      background: #2d2d2d;
-      padding: 10px 15px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .response-header .status { font-size: 12px; }
-    .status-success { color: #28a745; }
-    .status-error { color: #dc3545; }
-    .response-body {
-      padding: 15px;
-      color: #d4d4d4;
-      font-family: 'Monaco', 'Menlo', monospace;
-      font-size: 12px;
-      max-height: 400px;
-      overflow: auto;
-      white-space: pre-wrap;
-      word-break: break-all;
-    }
-    
-    .nav-tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-    .nav-tab {
-      padding: 8px 16px;
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 13px;
-    }
-    .nav-tab.active { background: #667eea; color: white; border-color: #667eea; }
-    
-    .module-section { display: none; }
-    .module-section.active { display: block; }
-    
-    .inline-form { display: flex; gap: 10px; align-items: flex-end; }
-    .inline-form .form-group { margin-bottom: 0; flex: 1; }
-    .inline-form .btn { height: 38px; }
+    h1 { text-align: center; margin-bottom: 20px; color: #333; }
+    .auth-section { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .auth-section h3 { margin-bottom: 15px; color: #666; }
+    .auth-section input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 10px; }
+    .tabs { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    .tab { padding: 10px 20px; background: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+    .tab.active { background: #4f46e5; color: #fff; }
+    .api-group { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .api-group h3 { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eee; }
+    .api-item { padding: 15px; border: 1px solid #eee; border-radius: 4px; margin-bottom: 10px; }
+    .api-item:hover { border-color: #4f46e5; }
+    .api-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .method { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; color: #fff; }
+    .method.GET { background: #10b981; }
+    .method.POST { background: #3b82f6; }
+    .method.PUT { background: #f59e0b; }
+    .method.DELETE { background: #ef4444; }
+    .path { font-family: monospace; color: #333; }
+    .desc { color: #666; font-size: 14px; }
+    .params { margin-top: 10px; }
+    .params textarea { width: 100%; height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 13px; }
+    .params input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; margin-top: 5px; }
+    .btn { padding: 8px 16px; background: #4f46e5; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 14px; }
+    .btn:hover { background: #4338ca; }
+    .btn:disabled { background: #ccc; cursor: not-allowed; }
+    .response { margin-top: 10px; padding: 10px; background: #1e1e1e; border-radius: 4px; color: #d4d4d4; font-family: monospace; font-size: 13px; white-space: pre-wrap; max-height: 300px; overflow: auto; display: none; }
+    .response.show { display: block; }
+    .response.error { background: #fee2e2; color: #991b1b; }
+    .response.success { background: #d1fae5; color: #065f46; }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1>Dream WeChat Backend API Tester</h1>
-      <p>交互式 API 测试工具 - 支持用户认证和管理员操作</p>
-    </header>
-
-    <div class="config-panel">
-      <h2>配置</h2>
-      <div class="config-row">
-        <div class="config-item">
-          <label>API Base URL</label>
-          <input type="text" id="baseUrl" value="http://localhost:3000">
-        </div>
-        <div class="config-item">
-          <label>JWT Token (用户认证)</label>
-          <input type="text" id="jwtToken" placeholder="Bearer token...">
-        </div>
-        <div class="config-item">
-          <label>Admin API Key (管理员认证)</label>
-          <input type="text" id="adminKey" value="admin_secret_key_change_in_production">
-        </div>
-      </div>
+    <h1>🚀 Dream API 测试工具</h1>
+    
+    <div class="auth-section">
+      <h3>🔑 认证配置</h3>
+      <input type="text" id="baseUrl" value="http://localhost:3000" placeholder="API Base URL">
+      <input type="text" id="jwtToken" placeholder="JWT Token (登录后自动填充)">
+      <input type="text" id="adminKey" value="admin_secret_key_change_in_production" placeholder="Admin API Key">
     </div>
 
-    <div class="nav-tabs">
-      <div class="nav-tab active" data-module="auth">认证</div>
-      <div class="nav-tab" data-module="users">用户</div>
-      <div class="nav-tab" data-module="characters">角色</div>
-      <div class="nav-tab" data-module="templates">模板</div>
-      <div class="nav-tab" data-module="favorites">收藏</div>
-      <div class="nav-tab" data-module="admin">管理</div>
+    <div class="tabs">
+      <button class="tab active" data-group="auth">认证</button>
+      <button class="tab" data-group="user">用户</button>
+      <button class="tab" data-group="jobs">生成任务</button>
+      <button class="tab" data-group="proxy">代理接口</button>
+      <button class="tab" data-group="templates">模板</button>
+      <button class="tab" data-group="characters">角色</button>
+      <button class="tab" data-group="admin">管理</button>
     </div>
 
     <!-- 认证模块 -->
-    <div class="module-section active" id="module-auth">
-      <div class="api-section">
-        <h3 onclick="toggleSection(this)">
-          <span><span class="badge badge-get">GET</span> /v1/auth/check - 检查登录状态</span>
-        </h3>
-        <div class="api-content">
-          <button class="btn btn-primary" onclick="callApi('GET', '/v1/auth/check', null, 'jwt', this)">发送请求</button>
-          <div class="response-panel" style="display:none">
-            <div class="response-header">
-              <span>响应</span>
-              <span class="status"></span>
-            </div>
-            <div class="response-body"></div>
-          </div>
+    <div class="api-group" data-group="auth">
+      <h3>🔐 认证模块</h3>
+      
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method POST">POST</span>
+          <span class="path">/v1/auth/send-code</span>
         </div>
+        <div class="desc">发送短信验证码</div>
+        <div class="params">
+          <textarea id="send-code-body">{"phone": "13800138000"}</textarea>
+          <button class="btn" onclick="callApi('POST', '/v1/auth/send-code', 'send-code-body', 'send-code-resp', false)">发送</button>
+        </div>
+        <div class="response" id="send-code-resp"></div>
       </div>
 
-      <div class="api-section">
-        <h3 onclick="toggleSection(this)">
-          <span><span class="badge badge-get">GET</span> /v1/auth/userinfo - 获取用户信息</span>
-        </h3>
-        <div class="api-content">
-          <button class="btn btn-primary" onclick="callApi('GET', '/v1/auth/userinfo', null, 'jwt', this)">发送请求</button>
-          <div class="response-panel" style="display:none">
-            <div class="response-header">
-              <span>响应</span>
-              <span class="status"></span>
-            </div>
-            <div class="response-body"></div>
-          </div>
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method POST">POST</span>
+          <span class="path">/v1/auth/phone-login</span>
         </div>
+        <div class="desc">手机号登录/注册（自动注册新用户）</div>
+        <div class="params">
+          <textarea id="phone-login-body">{"phone": "13800138000", "code": "123456"}</textarea>
+          <button class="btn" onclick="callApi('POST', '/v1/auth/phone-login', 'phone-login-body', 'phone-login-resp', false, true)">登录</button>
+        </div>
+        <div class="response" id="phone-login-resp"></div>
+      </div>
+
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method POST">POST</span>
+          <span class="path">/v1/auth/wechat-login</span>
+        </div>
+        <div class="desc">微信登录</div>
+        <div class="params">
+          <textarea id="wechat-login-body">{"code": "wx_login_code", "phoneCode": "phone_code_optional", "userInfo": {"nickName": "测试用户"}}</textarea>
+          <button class="btn" onclick="callApi('POST', '/v1/auth/wechat-login', 'wechat-login-body', 'wechat-login-resp', false, true)">登录</button>
+        </div>
+        <div class="response" id="wechat-login-resp"></div>
+      </div>
+
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method POST">POST</span>
+          <span class="path">/v1/auth/bind-phone</span>
+        </div>
+        <div class="desc">绑定手机号到当前账号</div>
+        <div class="params">
+          <textarea id="bind-phone-body">{"phone": "13800138000", "code": "123456"}</textarea>
+          <button class="btn" onclick="callApi('POST', '/v1/auth/bind-phone', 'bind-phone-body', 'bind-phone-resp', true)">绑定</button>
+        </div>
+        <div class="response" id="bind-phone-resp"></div>
+      </div>
+
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method GET">GET</span>
+          <span class="path">/v1/auth/userinfo</span>
+        </div>
+        <div class="desc">获取当前用户信息和统计</div>
+        <div class="params">
+          <button class="btn" onclick="callApi('GET', '/v1/auth/userinfo', null, 'userinfo-resp', true)">获取</button>
+        </div>
+        <div class="response" id="userinfo-resp"></div>
+      </div>
+
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method GET">GET</span>
+          <span class="path">/v1/auth/check</span>
+        </div>
+        <div class="desc">检查登录状态</div>
+        <div class="params">
+          <button class="btn" onclick="callApi('GET', '/v1/auth/check', null, 'auth-check-resp', true)">检查</button>
+        </div>
+        <div class="response" id="auth-check-resp"></div>
       </div>
     </div>
 
     <!-- 用户模块 -->
-    <div class="module-section" id="module-users">
-      <div class="api-section">
-        <h3 onclick="toggleSection(this)">
-          <span><span class="badge badge-get">GET</span> /v1/users/me - 获取当前用户</span>
-        </h3>
-        <div class="api-content">
-          <button class="btn btn-primary" onclick="callApi('GET', '/v1/users/me', null, 'jwt', this)">发送请求</button>
-          <div class="response-panel" style="display:none">
-            <div class="response-header"><span>响应</span><span class="status"></span></div>
-            <div class="response-body"></div>
-          </div>
+    <div class="api-group hidden" data-group="user">
+      <h3>👤 用户模块</h3>
+      
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method GET">GET</span>
+          <span class="path">/v1/users/me</span>
         </div>
+        <div class="desc">获取当前用户信息</div>
+        <div class="params">
+          <button class="btn" onclick="callApi('GET', '/v1/users/me', null, 'users-me-resp', true)">获取</button>
+        </div>
+        <div class="response" id="users-me-resp"></div>
       </div>
 
-      <div class="api-section">
-        <h3 onclick="toggleSection(this)">
-          <span><span class="badge badge-get">GET</span> /v1/users/me/stats - 获取用户统计</span>
-        </h3>
-        <div class="api-content">
-          <button class="btn btn-primary" onclick="callApi('GET', '/v1/users/me/stats', null, 'jwt', this)">发送请求</button>
-          <div class="response-panel" style="display:none">
-            <div class="response-header"><span>响应</span><span class="status"></span></div>
-            <div class="response-body"></div>
-          </div>
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method GET">GET</span>
+          <span class="path">/v1/users/me/stats</span>
         </div>
+        <div class="desc">获取用户统计（收藏、生成数、配额等）</div>
+        <div class="params">
+          <button class="btn" onclick="callApi('GET', '/v1/users/me/stats', null, 'users-stats-resp', true)">获取</button>
+        </div>
+        <div class="response" id="users-stats-resp"></div>
       </div>
     </div>
 
-    <!-- 角色模块 -->
-    <div class="module-section" id="module-characters">
-      <div class="api-section">
-        <h3 onclick="toggleSection(this)">
-          <span><span class="badge badge-get">GET</span> /v1/characters - 获取角色列表</span>
-        </h3>
-        <div class="api-content">
-          <button class="btn btn-primary" onclick="callApi('GET', '/v1/characters', null, 'jwt', this)">发送请求</button>
-          <div class="response-panel" style="display:none">
-            <div class="response-header"><span>响应</span><span class="status"></span></div>
-            <div class="response-body"></div>
-          </div>
+    <!-- 生成任务模块 -->
+    <div class="api-group hidden" data-group="jobs">
+      <h3>🎨 生成任务模块（本地记录）</h3>
+      
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method GET">GET</span>
+          <span class="path">/v1/jobs/quota</span>
         </div>
+        <div class="desc">获取配额信息</div>
+        <div class="params">
+          <button class="btn" onclick="callApi('GET', '/v1/jobs/quota', null, 'jobs-quota-resp', true)">获取</button>
+        </div>
+        <div class="response" id="jobs-quota-resp"></div>
       </div>
 
-      <div class="api-section">
-        <h3 onclick="toggleSection(this)">
-          <span><span class="badge badge-post">POST</span> /v1/characters - 创建角色</span>
-        </h3>
-        <div class="api-content">
-          <div class="form-group">
-            <label>请求体 (JSON)</label>
-            <textarea id="create-character-body">{
-  "name": "测试角色",
-  "description": "这是一个测试角色"
-}</textarea>
-          </div>
-          <button class="btn btn-primary" onclick="callApi('POST', '/v1/characters', document.getElementById('create-character-body').value, 'jwt', this)">发送请求</button>
-          <div class="response-panel" style="display:none">
-            <div class="response-header"><span>响应</span><span class="status"></span></div>
-            <div class="response-body"></div>
-          </div>
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method POST">POST</span>
+          <span class="path">/v1/jobs</span>
         </div>
+        <div class="desc">创建生成任务（自动检查配额）</div>
+        <div class="params">
+          <textarea id="create-job-body">{"prompt": "A cute cat", "aspectRatio": "1:1"}</textarea>
+          <button class="btn" onclick="callApi('POST', '/v1/jobs', 'create-job-body', 'create-job-resp', true)">创建</button>
+        </div>
+        <div class="response" id="create-job-resp"></div>
       </div>
 
-      <div class="api-section">
-        <h3 onclick="toggleSection(this)">
-          <span><span class="badge badge-get">GET</span> /v1/characters/:id - 获取角色详情</span>
-        </h3>
-        <div class="api-content">
-          <div class="inline-form">
-            <div class="form-group">
-              <label>角色 UUID</label>
-              <input type="text" id="get-character-id" placeholder="15797c59-1d08-4edb-9482-8757510c463f">
-            </div>
-            <button class="btn btn-primary" onclick="callApi('GET', '/v1/characters/' + document.getElementById('get-character-id').value, null, 'jwt', this)">发送请求</button>
-          </div>
-          <div class="response-panel" style="display:none">
-            <div class="response-header"><span>响应</span><span class="status"></span></div>
-            <div class="response-body"></div>
-          </div>
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method GET">GET</span>
+          <span class="path">/v1/jobs</span>
         </div>
+        <div class="desc">获取本地任务列表</div>
+        <div class="params">
+          <input type="text" id="jobs-list-params" value="page=1&limit=10" placeholder="查询参数">
+          <button class="btn" onclick="callApiWithQuery('GET', '/v1/jobs', 'jobs-list-params', 'jobs-list-resp', true)">获取</button>
+        </div>
+        <div class="response" id="jobs-list-resp"></div>
+      </div>
+    </div>
+
+    <!-- 代理模块 -->
+    <div class="api-group hidden" data-group="proxy">
+      <h3>🔄 代理模块（第三方 AI 服务）</h3>
+      
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method POST">POST</span>
+          <span class="path">/v1/proxy/images/generate</span>
+        </div>
+        <div class="desc">生成图片（代理到第三方服务）</div>
+        <div class="params">
+          <textarea id="proxy-generate-body">{"prompt": "A beautiful sunset", "mode": "final"}</textarea>
+          <button class="btn" onclick="callApi('POST', '/v1/proxy/images/generate', 'proxy-generate-body', 'proxy-generate-resp', true)">生成</button>
+        </div>
+        <div class="response" id="proxy-generate-resp"></div>
       </div>
 
-      <div class="api-section">
-        <h3 onclick="toggleSection(this)">
-          <span><span class="badge badge-delete">DELETE</span> /v1/characters/:id - 删除角色</span>
-        </h3>
-        <div class="api-content">
-          <div class="inline-form">
-            <div class="form-group">
-              <label>角色 UUID</label>
-              <input type="text" id="delete-character-id" placeholder="15797c59-1d08-4edb-9482-8757510c463f">
-            </div>
-            <button class="btn btn-primary" onclick="callApi('DELETE', '/v1/characters/' + document.getElementById('delete-character-id').value, null, 'jwt', this)">发送请求</button>
-          </div>
-          <div class="response-panel" style="display:none">
-            <div class="response-header"><span>响应</span><span class="status"></span></div>
-            <div class="response-body"></div>
-          </div>
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method GET">GET</span>
+          <span class="path">/v1/proxy/jobs</span>
         </div>
+        <div class="desc">获取任务列表（第三方）</div>
+        <div class="params">
+          <input type="text" id="proxy-jobs-params" value="limit=10" placeholder="查询参数">
+          <button class="btn" onclick="callApiWithQuery('GET', '/v1/proxy/jobs', 'proxy-jobs-params', 'proxy-jobs-resp', true)">获取</button>
+        </div>
+        <div class="response" id="proxy-jobs-resp"></div>
+      </div>
+
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method GET">GET</span>
+          <span class="path">/v1/proxy/jobs/:jobId</span>
+        </div>
+        <div class="desc">获取任务详情</div>
+        <div class="params">
+          <input type="text" id="proxy-job-id" placeholder="Job ID">
+          <button class="btn" onclick="callApiWithPath('GET', '/v1/proxy/jobs/', 'proxy-job-id', 'proxy-job-resp', true)">获取</button>
+        </div>
+        <div class="response" id="proxy-job-resp"></div>
       </div>
     </div>
 
     <!-- 模板模块 -->
-    <div class="module-section" id="module-templates">
-      <div class="api-section">
-        <h3 onclick="toggleSection(this)">
-          <span><span class="badge badge-get">GET</span> /v1/templates/prompts - 获取提示词模板</span>
-        </h3>
-        <div class="api-content">
-          <button class="btn btn-primary" onclick="callApi('GET', '/v1/templates/prompts', null, 'none', this)">发送请求</button>
-          <div class="response-panel" style="display:none">
-            <div class="response-header"><span>响应</span><span class="status"></span></div>
-            <div class="response-body"></div>
-          </div>
+    <div class="api-group hidden" data-group="templates">
+      <h3>📝 模板模块</h3>
+      
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method GET">GET</span>
+          <span class="path">/v1/templates/prompts</span>
         </div>
+        <div class="desc">获取提示词模板列表</div>
+        <div class="params">
+          <button class="btn" onclick="callApi('GET', '/v1/templates/prompts', null, 'templates-prompts-resp', false)">获取</button>
+        </div>
+        <div class="response" id="templates-prompts-resp"></div>
       </div>
 
-      <div class="api-section">
-        <h3 onclick="toggleSection(this)">
-          <span><span class="badge badge-get">GET</span> /v1/templates/params - 获取参数模板</span>
-        </h3>
-        <div class="api-content">
-          <button class="btn btn-primary" onclick="callApi('GET', '/v1/templates/params', null, 'none', this)">发送请求</button>
-          <div class="response-panel" style="display:none">
-            <div class="response-header"><span>响应</span><span class="status"></span></div>
-            <div class="response-body"></div>
-          </div>
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method GET">GET</span>
+          <span class="path">/v1/templates/params</span>
         </div>
+        <div class="desc">获取参数模板列表</div>
+        <div class="params">
+          <button class="btn" onclick="callApi('GET', '/v1/templates/params', null, 'templates-params-resp', false)">获取</button>
+        </div>
+        <div class="response" id="templates-params-resp"></div>
       </div>
 
-      <div class="api-section">
-        <h3 onclick="toggleSection(this)">
-          <span><span class="badge badge-post">POST</span> /v1/templates/prompts - 创建模板 <span class="badge badge-admin">Admin</span></span>
-        </h3>
-        <div class="api-content">
-          <div class="form-group">
-            <label>请求体 (JSON)</label>
-            <textarea id="create-template-body">{
-  "templateId": "test-001",
-  "title": "测试模板",
-  "description": "这是一个测试模板",
-  "prompt": "A beautiful landscape...",
-  "category": "landscape",
-  "isHot": false
-}</textarea>
-          </div>
-          <button class="btn btn-primary" onclick="callApi('POST', '/v1/templates/prompts', document.getElementById('create-template-body').value, 'admin', this)">发送请求</button>
-          <div class="response-panel" style="display:none">
-            <div class="response-header"><span>响应</span><span class="status"></span></div>
-            <div class="response-body"></div>
-          </div>
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method POST">POST</span>
+          <span class="path">/v1/templates/prompts</span>
         </div>
-      </div>
-
-      <div class="api-section">
-        <h3 onclick="toggleSection(this)">
-          <span><span class="badge badge-delete">DELETE</span> /v1/templates/prompts/:id - 删除模板 <span class="badge badge-admin">Admin</span></span>
-        </h3>
-        <div class="api-content">
-          <div class="inline-form">
-            <div class="form-group">
-              <label>模板 ID</label>
-              <input type="text" id="delete-template-id" placeholder="test-001">
-            </div>
-            <button class="btn btn-primary" onclick="callApi('DELETE', '/v1/templates/prompts/' + document.getElementById('delete-template-id').value, null, 'admin', this)">发送请求</button>
-          </div>
-          <div class="response-panel" style="display:none">
-            <div class="response-header"><span>响应</span><span class="status"></span></div>
-            <div class="response-body"></div>
-          </div>
+        <div class="desc">创建提示词模板（需要 Admin Key）</div>
+        <div class="params">
+          <textarea id="create-prompt-body">{"templateId": "test-001", "title": "测试模板", "prompt": "A test prompt", "category": "test"}</textarea>
+          <button class="btn" onclick="callApi('POST', '/v1/templates/prompts', 'create-prompt-body', 'create-prompt-resp', false, false, true)">创建</button>
         </div>
+        <div class="response" id="create-prompt-resp"></div>
       </div>
     </div>
 
-    <!-- 收藏模块 -->
-    <div class="module-section" id="module-favorites">
-      <div class="api-section">
-        <h3 onclick="toggleSection(this)">
-          <span><span class="badge badge-get">GET</span> /v1/favorites - 获取收藏列表</span>
-        </h3>
-        <div class="api-content">
-          <button class="btn btn-primary" onclick="callApi('GET', '/v1/favorites', null, 'jwt', this)">发送请求</button>
-          <div class="response-panel" style="display:none">
-            <div class="response-header"><span>响应</span><span class="status"></span></div>
-            <div class="response-body"></div>
-          </div>
+    <!-- 角色模块 -->
+    <div class="api-group hidden" data-group="characters">
+      <h3>🎭 角色模块</h3>
+      
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method GET">GET</span>
+          <span class="path">/v1/characters</span>
         </div>
+        <div class="desc">获取我的角色列表</div>
+        <div class="params">
+          <button class="btn" onclick="callApi('GET', '/v1/characters', null, 'characters-list-resp', true)">获取</button>
+        </div>
+        <div class="response" id="characters-list-resp"></div>
       </div>
 
-      <div class="api-section">
-        <h3 onclick="toggleSection(this)">
-          <span><span class="badge badge-post">POST</span> /v1/favorites - 添加收藏</span>
-        </h3>
-        <div class="api-content">
-          <div class="form-group">
-            <label>请求体 (JSON)</label>
-            <textarea id="add-favorite-body">{
-  "targetId": "image-123",
-  "targetType": "image"
-}</textarea>
-          </div>
-          <button class="btn btn-primary" onclick="callApi('POST', '/v1/favorites', document.getElementById('add-favorite-body').value, 'jwt', this)">发送请求</button>
-          <div class="response-panel" style="display:none">
-            <div class="response-header"><span>响应</span><span class="status"></span></div>
-            <div class="response-body"></div>
-          </div>
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method POST">POST</span>
+          <span class="path">/v1/characters</span>
         </div>
+        <div class="desc">创建角色</div>
+        <div class="params">
+          <textarea id="create-character-body">{"name": "测试角色", "description": "角色描述"}</textarea>
+          <button class="btn" onclick="callApi('POST', '/v1/characters', 'create-character-body', 'create-character-resp', true)">创建</button>
+        </div>
+        <div class="response" id="create-character-resp"></div>
+      </div>
+
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method DELETE">DELETE</span>
+          <span class="path">/v1/characters/:uuid</span>
+        </div>
+        <div class="desc">删除角色</div>
+        <div class="params">
+          <input type="text" id="delete-character-uuid" placeholder="Character UUID">
+          <button class="btn" onclick="callApiWithPath('DELETE', '/v1/characters/', 'delete-character-uuid', 'delete-character-resp', true)">删除</button>
+        </div>
+        <div class="response" id="delete-character-resp"></div>
       </div>
     </div>
 
     <!-- 管理模块 -->
-    <div class="module-section" id="module-admin">
-      <div class="api-section">
-        <h3 onclick="toggleSection(this)">
-          <span><span class="badge badge-get">GET</span> /v1/admin/stats - 管理统计 <span class="badge badge-admin">Admin</span></span>
-        </h3>
-        <div class="api-content">
-          <button class="btn btn-primary" onclick="callApi('GET', '/v1/admin/stats', null, 'admin', this)">发送请求</button>
-          <div class="response-panel" style="display:none">
-            <div class="response-header"><span>响应</span><span class="status"></span></div>
-            <div class="response-body"></div>
-          </div>
+    <div class="api-group hidden" data-group="admin">
+      <h3>⚙️ 管理模块</h3>
+      
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method GET">GET</span>
+          <span class="path">/v1/admin/stats</span>
         </div>
+        <div class="desc">获取管理统计</div>
+        <div class="params">
+          <button class="btn" onclick="callApi('GET', '/v1/admin/stats', null, 'admin-stats-resp', false, false, true)">获取</button>
+        </div>
+        <div class="response" id="admin-stats-resp"></div>
       </div>
 
-      <div class="api-section">
-        <h3 onclick="toggleSection(this)">
-          <span><span class="badge badge-get">GET</span> /v1/admin/users - 用户列表 <span class="badge badge-admin">Admin</span></span>
-        </h3>
-        <div class="api-content">
-          <div class="inline-form">
-            <div class="form-group">
-              <label>页码</label>
-              <input type="number" id="admin-users-page" value="1" min="1">
-            </div>
-            <div class="form-group">
-              <label>每页数量</label>
-              <input type="number" id="admin-users-limit" value="20" min="1" max="100">
-            </div>
-            <div class="form-group">
-              <label>搜索</label>
-              <input type="text" id="admin-users-search" placeholder="昵称或 openid">
-            </div>
-            <button class="btn btn-primary" onclick="callApi('GET', '/v1/admin/users?page=' + document.getElementById('admin-users-page').value + '&limit=' + document.getElementById('admin-users-limit').value + '&search=' + document.getElementById('admin-users-search').value, null, 'admin', this)">发送请求</button>
-          </div>
-          <div class="response-panel" style="display:none">
-            <div class="response-header"><span>响应</span><span class="status"></span></div>
-            <div class="response-body"></div>
-          </div>
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method GET">GET</span>
+          <span class="path">/v1/admin/users</span>
         </div>
+        <div class="desc">获取用户列表</div>
+        <div class="params">
+          <input type="text" id="admin-users-params" value="page=1&limit=10" placeholder="查询参数">
+          <button class="btn" onclick="callApiWithQuery('GET', '/v1/admin/users', 'admin-users-params', 'admin-users-resp', false, true)">获取</button>
+        </div>
+        <div class="response" id="admin-users-resp"></div>
       </div>
 
-      <div class="api-section">
-        <h3 onclick="toggleSection(this)">
-          <span><span class="badge badge-get">GET</span> /v1/admin/users/:id - 用户详情 <span class="badge badge-admin">Admin</span></span>
-        </h3>
-        <div class="api-content">
-          <div class="inline-form">
-            <div class="form-group">
-              <label>用户 ID</label>
-              <input type="number" id="admin-user-id" value="1" min="1">
-            </div>
-            <button class="btn btn-primary" onclick="callApi('GET', '/v1/admin/users/' + document.getElementById('admin-user-id').value, null, 'admin', this)">发送请求</button>
-          </div>
-          <div class="response-panel" style="display:none">
-            <div class="response-header"><span>响应</span><span class="status"></span></div>
-            <div class="response-body"></div>
-          </div>
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method PUT">PUT</span>
+          <span class="path">/v1/admin/users/:id/vip</span>
         </div>
+        <div class="desc">设置用户 VIP</div>
+        <div class="params">
+          <input type="text" id="set-vip-user-id" placeholder="User ID">
+          <textarea id="set-vip-body">{"vipLevel": "VIP", "days": 30}</textarea>
+          <button class="btn" onclick="callApiWithPathAndBody('PUT', '/v1/admin/users/', '/vip', 'set-vip-user-id', 'set-vip-body', 'set-vip-resp', true)">设置</button>
+        </div>
+        <div class="response" id="set-vip-resp"></div>
       </div>
 
-      <div class="api-section">
-        <h3 onclick="toggleSection(this)">
-          <span><span class="badge badge-put">PUT</span> /v1/admin/users/:id/vip - 设置 VIP <span class="badge badge-admin">Admin</span></span>
-        </h3>
-        <div class="api-content">
-          <div class="form-group">
-            <label>用户 ID</label>
-            <input type="number" id="set-vip-user-id" value="1" min="1">
-          </div>
-          <div class="form-group">
-            <label>请求体 (JSON)</label>
-            <textarea id="set-vip-body">{
-  "vipLevel": "VIP",
-  "days": 30
-}</textarea>
-          </div>
-          <button class="btn btn-primary" onclick="callApi('PUT', '/v1/admin/users/' + document.getElementById('set-vip-user-id').value + '/vip', document.getElementById('set-vip-body').value, 'admin', this)">发送请求</button>
-          <div class="response-panel" style="display:none">
-            <div class="response-header"><span>响应</span><span class="status"></span></div>
-            <div class="response-body"></div>
-          </div>
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method DELETE">DELETE</span>
+          <span class="path">/v1/admin/users/:id/vip</span>
         </div>
-      </div>
-
-      <div class="api-section">
-        <h3 onclick="toggleSection(this)">
-          <span><span class="badge badge-delete">DELETE</span> /v1/admin/users/:id/vip - 取消 VIP <span class="badge badge-admin">Admin</span></span>
-        </h3>
-        <div class="api-content">
-          <div class="inline-form">
-            <div class="form-group">
-              <label>用户 ID</label>
-              <input type="number" id="cancel-vip-user-id" value="1" min="1">
-            </div>
-            <button class="btn btn-primary" onclick="callApi('DELETE', '/v1/admin/users/' + document.getElementById('cancel-vip-user-id').value + '/vip', null, 'admin', this)">发送请求</button>
-          </div>
-          <div class="response-panel" style="display:none">
-            <div class="response-header"><span>响应</span><span class="status"></span></div>
-            <div class="response-body"></div>
-          </div>
+        <div class="desc">取消用户 VIP</div>
+        <div class="params">
+          <input type="text" id="cancel-vip-user-id" placeholder="User ID">
+          <button class="btn" onclick="callApiWithPath('DELETE', '/v1/admin/users/', '/vip', 'cancel-vip-user-id', 'cancel-vip-resp', true)">取消</button>
         </div>
-      </div>
-
-      <div class="api-section">
-        <h3 onclick="toggleSection(this)">
-          <span><span class="badge badge-delete">DELETE</span> /v1/admin/users/:id - 删除用户 <span class="badge badge-admin">Admin</span></span>
-        </h3>
-        <div class="api-content">
-          <div class="inline-form">
-            <div class="form-group">
-              <label>用户 ID</label>
-              <input type="number" id="delete-user-id" value="1" min="1">
-            </div>
-            <button class="btn btn-primary" onclick="callApi('DELETE', '/v1/admin/users/' + document.getElementById('delete-user-id').value, null, 'admin', this)">发送请求</button>
-          </div>
-          <div class="response-panel" style="display:none">
-            <div class="response-header"><span>响应</span><span class="status"></span></div>
-            <div class="response-body"></div>
-          </div>
-        </div>
+        <div class="response" id="cancel-vip-resp"></div>
       </div>
     </div>
   </div>
 
   <script>
-    // 切换 API 内容显示
-    function toggleSection(header) {
-      const content = header.nextElementSibling;
-      content.classList.toggle('active');
-    }
-
-    // 切换模块
-    document.querySelectorAll('.nav-tab').forEach(tab => {
+    // Tab switching
+    document.querySelectorAll('.tab').forEach(tab => {
       tab.addEventListener('click', () => {
-        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-        document.querySelectorAll('.module-section').forEach(m => m.classList.remove('active'));
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
-        document.getElementById('module-' + tab.dataset.module).classList.add('active');
+        
+        const group = tab.dataset.group;
+        document.querySelectorAll('.api-group').forEach(g => {
+          g.classList.toggle('hidden', g.dataset.group !== group);
+        });
       });
     });
 
-    // 调用 API
-    async function callApi(method, path, body, authType, btn) {
-      const baseUrl = document.getElementById('baseUrl').value;
-      const jwtToken = document.getElementById('jwtToken').value;
-      const adminKey = document.getElementById('adminKey').value;
+    function getBaseUrl() {
+      return document.getElementById('baseUrl').value;
+    }
 
-      const responsePanel = btn.parentElement.querySelector('.response-panel');
-      const statusEl = responsePanel.querySelector('.status');
-      const bodyEl = responsePanel.querySelector('.response-body');
+    function getJwtToken() {
+      return document.getElementById('jwtToken').value;
+    }
 
-      responsePanel.style.display = 'block';
-      statusEl.textContent = '请求中...';
-      statusEl.className = 'status';
-      bodyEl.textContent = '';
+    function getAdminKey() {
+      return document.getElementById('adminKey').value;
+    }
 
-      const headers = {
-        'Content-Type': 'application/json'
-      };
+    async function callApi(method, path, bodyId, respId, needAuth, saveToken = false, needAdmin = false) {
+      const respEl = document.getElementById(respId);
+      respEl.classList.remove('success', 'error');
+      respEl.classList.add('show');
+      respEl.textContent = 'Loading...';
 
-      if (authType === 'jwt' && jwtToken) {
-        headers['Authorization'] = 'Bearer ' + jwtToken;
-      } else if (authType === 'admin' && adminKey) {
-        headers['X-Admin-Key'] = adminKey;
+      const headers = { 'Content-Type': 'application/json' };
+      if (needAuth) headers['Authorization'] = `Bearer ${getJwtToken()}`;
+      if (needAdmin) headers['X-Admin-Key'] = getAdminKey();
+
+      const options = { method, headers };
+      if (bodyId) {
+        const body = document.getElementById(bodyId).value;
+        options.body = body;
       }
 
       try {
-        const options = { method, headers };
-        if (body && (method === 'POST' || method === 'PUT')) {
-          options.body = body;
+        const res = await fetch(`${getBaseUrl()}${path}`, options);
+        const data = await res.json();
+        
+        respEl.classList.add(res.ok ? 'success' : 'error');
+        respEl.textContent = JSON.stringify(data, null, 2);
+
+        if (saveToken && data.token) {
+          document.getElementById('jwtToken').value = data.token;
         }
-
-        const response = await fetch(baseUrl + path, options);
-        const data = await response.json();
-
-        statusEl.textContent = `${response.status} ${response.statusText}`;
-        statusEl.className = 'status ' + (response.ok ? 'status-success' : 'status-error');
-        bodyEl.textContent = JSON.stringify(data, null, 2);
-      } catch (error) {
-        statusEl.textContent = 'Error';
-        statusEl.className = 'status status-error';
-        bodyEl.textContent = error.message;
+      } catch (err) {
+        respEl.classList.add('error');
+        respEl.textContent = `Error: ${err.message}`;
       }
+    }
+
+    async function callApiWithQuery(method, path, paramsId, respId, needAuth, needAdmin = false) {
+      const params = document.getElementById(paramsId).value;
+      const fullPath = params ? `${path}?${params}` : path;
+      await callApi(method, fullPath, null, respId, needAuth, false, needAdmin);
+    }
+
+    async function callApiWithPath(method, basePath, pathId, respId, needAuth, suffix = '') {
+      const pathValue = document.getElementById(pathId).value;
+      const fullPath = `${basePath}${pathValue}${suffix}`;
+      await callApi(method, fullPath, null, respId, needAuth);
+    }
+
+    async function callApiWithPathAndBody(method, basePath, suffix, pathId, bodyId, respId, needAdmin) {
+      const pathValue = document.getElementById(pathId).value;
+      const fullPath = `${basePath}${pathValue}${suffix}`;
+      await callApi(method, fullPath, bodyId, respId, false, false, needAdmin);
     }
   </script>
 </body>

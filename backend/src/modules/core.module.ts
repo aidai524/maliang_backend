@@ -23,6 +23,8 @@ import { JobsController } from './jobs/jobs.controller';
 // Services
 import { AuthService } from './auth/auth.service';
 import { WechatAuthService } from './auth/wechat-auth.service';
+import { PhoneAuthService } from './auth/phone-auth.service';
+import { SmsService } from './auth/sms.service';
 import { UsersService } from './users/users.service';
 import { VipService } from './vip/vip.service';
 import { OrdersService } from './orders/orders.service';
@@ -116,6 +118,8 @@ import { Generation } from './generations/entities/generation.entity';
     // Business Services
     AuthService,
     WechatAuthService,
+    PhoneAuthService,
+    SmsService,
     UsersService,
     VipService,
     OrdersService,
