@@ -2,9 +2,10 @@ import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { RedisService } from '../../common/providers/redis.service';
 
-// 阿里云 SMS SDK（需要时安装: npm install @alicloud/dysmsapi20170525）
-// import Dysmsapi20170525 from '@alicloud/dysmsapi20170525';
-// import * as OpenApi from '@alicloud/openapi-client';
+// 阿里云 SMS SDK
+import Dysmsapi20170525, * as $Dysmsapi20170525 from '@alicloud/dysmsapi20170525';
+import * as OpenApi from '@alicloud/openapi-client';
+import * as Util from '@alicloud/tea-util';
 
 export interface SendSmsResult {
   success: boolean;
@@ -98,42 +99,56 @@ export class SmsService {
   }
 
   /**
+   * 创建阿里云短信客户端
+   */
+  private createAliyunClient(): Dysmsapi20170525 {
+    const config = new OpenApi.Config({
+      accessKeyId: this.aliyunAccessKeyId,
+      accessKeySecret: this.aliyunAccessKeySecret,
+    });
+    config.endpoint = 'dysmsapi.aliyuncs.com';
+    return new Dysmsapi20170525(config);
+  }
+
+  /**
    * 通过阿里云发送短信
    */
   private async sendViaAliyun(phone: string, code: string): Promise<SendSmsResult> {
     try {
-      // TODO: 实现阿里云短信发送
-      // 需要安装 SDK: npm install @alicloud/dysmsapi20170525 @alicloud/openapi-client
-      /*
-      const config = new OpenApi.Config({
-        accessKeyId: this.aliyunAccessKeyId,
-        accessKeySecret: this.aliyunAccessKeySecret,
-      });
-      config.endpoint = 'dysmsapi.aliyuncs.com';
+      const client = this.createAliyunClient();
       
-      const client = new Dysmsapi20170525(config);
-      const request = new Dysmsapi20170525.SendSmsRequest({
+      const sendSmsRequest = new $Dysmsapi20170525.SendSmsRequest({
         phoneNumbers: phone,
         signName: this.aliyunSignName,
         templateCode: this.aliyunTemplateCode,
         templateParam: JSON.stringify({ code }),
       });
       
-      const response = await client.sendSms(request);
+      const runtime = new Util.RuntimeOptions({});
+      
+      this.logger.log(`[ALIYUN SMS] Sending code to ${phone}`);
+      
+      const response = await client.sendSmsWithOptions(sendSmsRequest, runtime);
       
       if (response.body.code === 'OK') {
-        return { success: true, message: 'Verification code sent' };
+        this.logger.log(`[ALIYUN SMS] Successfully sent to ${phone}, BizId: ${response.body.bizId}`);
+        return { 
+          success: true, 
+          message: 'Verification code sent' 
+        };
       } else {
-        throw new Error(response.body.message);
+        this.logger.error(`[ALIYUN SMS] Failed: ${response.body.code} - ${response.body.message}`);
+        throw new Error(response.body.message || 'SMS send failed');
       }
-      */
-      
-      // 临时：阿里云模式下也使用模拟（等待审核通过后切换）
-      this.logger.warn('[ALIYUN SMS] SDK not configured, falling back to mock mode');
-      return this.sendViaMock(phone, code);
     } catch (error) {
-      this.logger.error(`Failed to send SMS via Aliyun: ${error.message}`);
-      throw new BadRequestException('Failed to send verification code');
+      this.logger.error(`[ALIYUN SMS] Error: ${error.message}`);
+      
+      // 如果是阿里云 API 错误，返回更友好的提示
+      if (error.code) {
+        this.logger.error(`[ALIYUN SMS] Error code: ${error.code}, data: ${JSON.stringify(error.data)}`);
+      }
+      
+      throw new BadRequestException('Failed to send verification code, please try again later');
     }
   }
 
