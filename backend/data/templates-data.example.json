@@ -1,0 +1,112 @@
+{
+  "promptTemplates": [
+    {
+      "templateId": "cyberpunk_style",
+      "title": "赛博朋克风格",
+      "description": "未来科幻风格，霓虹灯效，暗色调",
+      "prompt": "A futuristic cyberpunk cityscape, neon lights, rain, 8K, ultra detailed, vibrant colors",
+      "category": "style",
+      "thumbnailUrl": "https://your-domain.com/uploads/thumbnail-cyberpunk.jpg",
+      "previewImages": [
+        "https://your-domain.com/uploads/cyberpunk-1.jpg",
+        "https://your-domain.com/uploads/cyberpunk-2.jpg"
+      ],
+      "isHot": true
+    },
+    {
+      "templateId": "ghibli_style",
+      "title": "吉卜力风格",
+      "description": "宫崎骏动画风格，清新自然",
+      "prompt": "Studio Ghibli style, beautiful landscape, hand drawn, vibrant colors, peaceful",
+      "category": "style",
+      "isHot": true
+    },
+    {
+      "templateId": "photorealistic",
+      "title": "写实风格",
+      "description": "照片级真实感，专业摄影效果",
+      "prompt": "Photorealistic, ultra detailed, natural lighting, professional photography, 8K",
+      "category": "style",
+      "isHot": false
+    },
+    {
+      "templateId": "anime_style",
+      "title": "动漫风格",
+      "description": "日式动漫风格，线条清晰",
+      "prompt": "Anime style, vibrant colors, clean lines, detailed artwork, manga style",
+      "category": "style",
+      "isHot": false
+    },
+    {
+      "templateId": "portrait",
+      "title": "人物肖像",
+      "description": "专业人像摄影效果",
+      "prompt": "A portrait photography, professional lighting, detailed facial features, bokeh background",
+      "category": "subject",
+      "isHot": true
+    },
+    {
+      "templateId": "landscape",
+      "title": "自然风景",
+      "description": "美丽的自然风光",
+      "prompt": "Beautiful natural landscape, mountains, lake, sunset, peaceful atmosphere, wide angle",
+      "category": "subject",
+      "isHot": true
+    },
+    {
+      "templateId": "fantasy_world",
+      "title": "奇幻世界",
+      "description": "魔法幻想风格",
+      "prompt": "Fantasy world, magical creatures, floating islands, ethereal lighting, epic scale",
+      "category": "scene",
+      "isHot": false
+    }
+  ],
+  "paramTemplates": [
+    {
+      "templateId": "quick_preview",
+      "title": "快速预览",
+      "description": "快速生成预览图",
+      "mode": "draft",
+      "resolution": null,
+      "aspectRatio": "1:1",
+      "sampleCount": 1
+    },
+    {
+      "templateId": "hd_portrait",
+      "title": "高清人像",
+      "description": "适合人像的高清输出",
+      "mode": "final",
+      "resolution": "2K",
+      "aspectRatio": "9:16",
+      "sampleCount": 1
+    },
+    {
+      "templateId": "hd_landscape",
+      "title": "高清风景",
+      "description": "适合风景的高清输出",
+      "mode": "final",
+      "resolution": "2K",
+      "aspectRatio": "16:9",
+      "sampleCount": 1
+    },
+    {
+      "templateId": "uhd_wallpaper",
+      "title": "超高清壁纸",
+      "description": "4K超高清壁纸",
+      "mode": "final",
+      "resolution": "4K",
+      "aspectRatio": "16:9",
+      "sampleCount": 1
+    },
+    {
+      "templateId": "social_square",
+      "title": "社交方形",
+      "description": "适合社交媒体的方形比例",
+      "mode": "final",
+      "resolution": "2K",
+      "aspectRatio": "1:1",
+      "sampleCount": 2
+    }
+  ]
+}

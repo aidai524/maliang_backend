@@ -22,7 +22,8 @@
     "migration:generate": "npm run typeorm -- migration:generate -d src/database/data-source.ts",
     "migration:run": "npm run typeorm -- migration:run -d src/database/data-source.ts",
     "migration:revert": "npm run typeorm -- migration:revert -d src/database/data-source.ts",
-    "seed": "ts-node src/database/seeds/run-seed.ts"
+    "seed": "ts-node src/database/seeds/run-seed.ts",
+    "import-templates": "ts-node src/database/seeds/run-import.ts"
   },
   "dependencies": {
     "@alicloud/dysmsapi20170525": "^4.4.0",
