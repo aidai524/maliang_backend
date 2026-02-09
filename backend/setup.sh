@@ -14,12 +14,12 @@ echo "📦 Installing dependencies..."
 npm install
 
 echo "🐳 Building Docker containers..."
-docker-compose build
+docker compose build
 
 echo "🎯 All services ready to start!"
 echo ""
 echo "To start the application:"
-echo "  docker-compose up -d"
+echo "  docker compose up -d"
 echo ""
 echo "To run database seeds:"
 echo "  npm run seed"

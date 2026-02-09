@@ -5,7 +5,7 @@ WORKDIR /app
 
 # 复制依赖文件
 COPY package*.json ./
-RUN npm ci
+RUN NODE_OPTIONS="--max-old-space-size=1024" npm ci
 
 # 复制源代码
 COPY . .
@@ -14,7 +14,8 @@ COPY . .
 ARG NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
 
-# 构建
+# 构建 - 限制内存使用
+ENV NODE_OPTIONS="--max-old-space-size=1024"
 RUN npm run build
 
 # Production stage

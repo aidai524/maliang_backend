@@ -13,6 +13,8 @@ import { extname, join } from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { existsSync, mkdirSync } from 'fs';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
+import { EitherAuthGuard } from '../../common/guards/either-auth.guard';
+import { AdminAuthGuard } from '../../common/guards/admin-auth.guard';
 
 // 上传目录配置
 const uploadDir = join(process.cwd(), 'uploads');
@@ -46,7 +48,7 @@ const imageFileFilter = (req: any, file: any, cb: any) => {
 @Controller('upload')
 export class UploadController {
   @Post('image')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(EitherAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Upload an image' })
   @ApiConsumes('multipart/form-data')
