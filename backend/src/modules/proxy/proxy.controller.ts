@@ -16,7 +16,7 @@ export class ProxyController {
     @Request() req: any,
     @Body() generateDto: any,
   ): Promise<any> {
-    const userId = req.user?.id || null;
+    const userId = req.user?.userId || req.user?.id || null;
     return await this.proxyService.proxyImageGeneration(userId, generateDto);
   }
 

@@ -102,6 +102,13 @@ export class ProxyService {
     // 移除 characterId，不需要传给第三方
     delete requestBody.characterId;
 
+    // 调试日志：打印实际发送的请求体（不打印完整 base64）
+    const debugBody = { ...requestBody };
+    if (debugBody.inputImage) {
+      debugBody.inputImage = `${debugBody.inputImage.substring(0, 50)}...(${debugBody.inputImage.length} chars)`;
+    }
+    this.logger.log(`Sending to third-party API: ${JSON.stringify(debugBody)}`);
+
     return await this.httpService.proxyPost(url, requestBody, {
       headers: this.getAuthHeaders(),
     });
