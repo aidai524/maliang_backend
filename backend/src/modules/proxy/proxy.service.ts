@@ -54,6 +54,8 @@ export class ProxyService {
   async proxyImageGeneration(userId: number | null, generateDto: any): Promise<any> {
     const url = '/v1/images/generate';
     
+    this.logger.log(`proxyImageGeneration called - userId: ${userId}, characterId: ${generateDto.characterId}`);
+    
     // 处理锁脸功能
     let inputImage: string | undefined = generateDto.inputImage;
     let finalPrompt = generateDto.prompt;
