@@ -456,7 +456,7 @@ Authorization: Bearer <JWT_TOKEN>
 
 **POST** `/v1/proxy/images/generate`
 
-直接代理到第三方 AI 服务，不记录到本地数据库。
+代理到第三方 AI 服务生成图片，支持锁脸功能。
 
 **Headers：**
 ```
@@ -469,15 +469,41 @@ Authorization: Bearer <JWT_TOKEN>
   "prompt": "A beautiful sunset over mountains",
   "mode": "final",
   "resolution": "2K",
-  "aspectRatio": "16:9"
+  "aspectRatio": "16:9",
+  "characterId": "optional-character-uuid",
+  "inputImage": "data:image/png;base64,iVBORw0KGgo..."
 }
 ```
+
+**参数说明：**
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| prompt | string | 是 | 生成提示词 |
+| mode | string | 否 | 生成模式，"draft" 或 "final" |
+| resolution | string | 否 | 分辨率，如 "2K", "4K" |
+| aspectRatio | string | 否 | 宽高比，如 "16:9", "1:1" |
+| characterId | string | 否 | 角色 UUID，用于锁脸功能。传入后会自动获取角色照片作为参考图 |
+| inputImage | string | 否 | 直接传入参考图片，格式: `data:image/<type>;base64,<data>` |
+
+**锁脸功能说明：**
+- 传入 `characterId` 时，系统会自动获取该角色的第一张照片作为参考图
+- 系统会自动添加锁脸指令到提示词，确保生成的图片保持一致的面部特征
+- 也可以直接传入 `inputImage` 字段，使用自定义的参考图片
 
 **响应：**
 ```json
 {
   "jobId": "cmkuz35wf00034rk15ycgzvce",
   "status": "QUEUED"
+}
+```
+
+**错误响应（角色无照片）：**
+```json
+{
+  "statusCode": 400,
+  "message": "Selected character has no photos. Please upload photos first."
 }
 ```
 

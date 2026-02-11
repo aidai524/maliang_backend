@@ -1,6 +1,7 @@
-import { Controller, Post, Get, Delete, Headers, Body, Query, Param } from '@nestjs/common';
+import { Controller, Post, Get, Delete, Headers, Body, Query, Param, UseGuards, Request } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { ProxyService } from './proxy.service';
+import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 
 @ApiTags('Proxy')
 @ApiBearerAuth()
@@ -9,12 +10,14 @@ export class ProxyController {
   constructor(private readonly proxyService: ProxyService) {}
 
   @Post('images/generate')
-  @ApiOperation({ summary: 'Generate image (proxy to third-party API)' })
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Generate image (proxy to third-party API, supports face-lock)' })
   async generateImage(
-    @Headers('Authorization') authHeader: string,
+    @Request() req: any,
     @Body() generateDto: any,
   ): Promise<any> {
-    return await this.proxyService.proxyImageGeneration(authHeader, generateDto);
+    const userId = req.user?.id || null;
+    return await this.proxyService.proxyImageGeneration(userId, generateDto);
   }
 
   @Get('jobs')
