@@ -49,7 +49,7 @@ export class JobsService {
     // 2. 处理锁脸功能：获取角色照片
     let inputImage: string | undefined = dto.inputImage;
     let finalPrompt = dto.prompt;
-    let usedCharacterId: string | undefined;
+    let usedCharacterId: string | number | undefined;
 
     if (dto.characterId) {
       try {

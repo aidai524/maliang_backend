@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsObject } from 'class-validator';
+import { IsString, IsOptional, IsObject, IsNumber } from 'class-validator';
 
 export class CreateJobDto {
   @IsString()
@@ -24,10 +24,9 @@ export class CreateJobDto {
   @IsString()
   mode?: string;
 
-  // 角色 UUID，用于锁脸功能
+  // 角色 ID 或 UUID，用于锁脸功能（支持数字 ID 或字符串 UUID）
   @IsOptional()
-  @IsString()
-  characterId?: string;
+  characterId?: string | number;
 
   // 直接传入参考图片 (data:image/...;base64,...)
   @IsOptional()

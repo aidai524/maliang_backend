@@ -44,15 +44,33 @@ export class CharactersService {
     };
   }
 
-  // 获取单个角色详情
-  async findOne(userId: number, characterUuid: string): Promise<Character> {
-    const character = await this.characterRepository.findOne({
-      where: { uuid: characterUuid },
-      relations: ['photos'],
-    });
+  // 获取单个角色详情（支持 UUID 或数字 ID）
+  async findOne(userId: number, characterIdOrUuid: string | number): Promise<Character> {
+    let character: Character | null = null;
+
+    // 判断是数字 ID 还是 UUID
+    const numericId = typeof characterIdOrUuid === 'number' 
+      ? characterIdOrUuid 
+      : parseInt(characterIdOrUuid, 10);
+
+    if (!isNaN(numericId)) {
+      // 用数字 ID 查找
+      character = await this.characterRepository.findOne({
+        where: { id: numericId },
+        relations: ['photos'],
+      });
+    }
+    
+    // 如果用 ID 没找到，尝试用 UUID 查找
+    if (!character && typeof characterIdOrUuid === 'string') {
+      character = await this.characterRepository.findOne({
+        where: { uuid: characterIdOrUuid },
+        relations: ['photos'],
+      });
+    }
 
     if (!character) {
-      throw new NotFoundException(`Character ${characterUuid} not found`);
+      throw new NotFoundException(`Character ${characterIdOrUuid} not found`);
     }
 
     // 检查是否属于该用户
@@ -160,9 +178,9 @@ export class CharactersService {
     this.logger.log(`Deleted photo ${photoUuid} from character ${characterUuid}`);
   }
 
-  // 获取角色的所有照片（用于 AI 生成）
-  async getCharacterPhotos(userId: number, characterUuid: string): Promise<CharacterPhoto[]> {
-    const character = await this.findOne(userId, characterUuid);
+  // 获取角色的所有照片（用于 AI 生成，支持 ID 或 UUID）
+  async getCharacterPhotos(userId: number, characterIdOrUuid: string | number): Promise<CharacterPhoto[]> {
+    const character = await this.findOne(userId, characterIdOrUuid);
     return character.photos;
   }
 
