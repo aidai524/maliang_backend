@@ -1,10 +1,17 @@
-import { Injectable, ForbiddenException, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, ForbiddenException, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CustomHttpService } from '../../common/providers/custom-http.service';
 import { GenerationsService } from '../generations/generations.service';
 import { Generation, GenerationStatus } from '../generations/entities/generation.entity';
 import { UsersService } from '../users/users.service';
+import { CharactersService } from '../characters/characters.service';
 import { CreateJobDto } from './dto/create-job.dto';
+import axios from 'axios';
+
+// 锁脸提示词前缀（英文，让 AI 更好理解）
+const FACE_LOCK_PROMPT_PREFIX = `Please reference the facial features from the following character image and generate an image that matches the requirements. Maintain consistent facial characteristics, face shape, and key features.
+
+Style requirement: `;
 
 @Injectable()
 export class JobsService {
@@ -16,6 +23,7 @@ export class JobsService {
     private readonly configService: ConfigService,
     private readonly generationsService: GenerationsService,
     private readonly usersService: UsersService,
+    private readonly charactersService: CharactersService,
   ) {
     const config = this.configService.get('app');
     this.apiKey = config.thirdPartyApi.apiKey;
@@ -38,15 +46,58 @@ export class JobsService {
       throw new ForbiddenException(reason);
     }
 
-    // 2. 调用第三方 API 创建任务
-    const requestBody = {
-      prompt: dto.prompt,
+    // 2. 处理锁脸功能：获取角色照片
+    let inputImage: string | undefined = dto.inputImage;
+    let finalPrompt = dto.prompt;
+    let usedCharacterId: string | undefined;
+
+    if (dto.characterId) {
+      try {
+        // 获取角色的照片
+        const photos = await this.charactersService.getCharacterPhotos(userId, dto.characterId);
+        
+        if (!photos || photos.length === 0) {
+          throw new BadRequestException('Selected character has no photos. Please upload photos first.');
+        }
+
+        // 使用第一张照片作为参考图（原图优先，没有则用缩略图）
+        const photo = photos[0];
+        const imageUrl = photo.originalUrl || photo.thumbnailUrl;
+        
+        if (imageUrl) {
+          // 下载图片并转换为 base64
+          inputImage = await this.downloadImageAsBase64(imageUrl, photo.mimeType);
+          usedCharacterId = dto.characterId;
+          
+          // 添加锁脸提示词前缀
+          finalPrompt = FACE_LOCK_PROMPT_PREFIX + dto.prompt;
+          
+          this.logger.log(`Using character ${dto.characterId} photo for face lock`);
+        }
+      } catch (error) {
+        if (error instanceof BadRequestException || error instanceof NotFoundException || error instanceof ForbiddenException) {
+          throw error;
+        }
+        this.logger.error(`Failed to get character photo: ${error.message}`);
+        throw new BadRequestException('Failed to load character photo for face lock');
+      }
+    }
+
+    // 3. 调用第三方 API 创建任务
+    const requestBody: any = {
+      prompt: finalPrompt,
       negative_prompt: dto.negativePrompt,
       model: dto.model,
       aspect_ratio: dto.aspectRatio,
       resolution: dto.resolution,
+      mode: dto.mode || 'final',
       ...dto.params,
     };
+
+    // 如果有参考图片，添加 inputImage 字段
+    if (inputImage) {
+      requestBody.inputImage = inputImage;
+    }
 
     let thirdPartyResponse: any;
     try {
@@ -60,28 +111,52 @@ export class JobsService {
       throw error;
     }
 
-    // 3. 记录到数据库
+    // 4. 记录到数据库
     const jobId = thirdPartyResponse?.id || thirdPartyResponse?.job_id;
     
     const generation = await this.generationsService.createGeneration(
       userId,
-      dto.prompt,
+      dto.prompt, // 保存原始提示词（不含锁脸前缀）
       jobId,
       {
         negativePrompt: dto.negativePrompt,
         model: dto.model,
         aspectRatio: dto.aspectRatio,
         resolution: dto.resolution,
+        mode: dto.mode,
+        characterId: usedCharacterId,
         ...dto.params,
       },
     );
 
-    this.logger.log(`Created job ${jobId} for user ${userId}, generation ID: ${generation.id}`);
+    this.logger.log(`Created job ${jobId} for user ${userId}, generation ID: ${generation.id}${usedCharacterId ? `, character: ${usedCharacterId}` : ''}`);
 
     return {
       ...thirdPartyResponse,
       generationId: generation.id,
     };
+  }
+
+  /**
+   * 下载图片并转换为 base64 格式
+   */
+  private async downloadImageAsBase64(imageUrl: string, mimeType: string = 'image/jpeg'): Promise<string> {
+    try {
+      const response = await axios.get(imageUrl, {
+        responseType: 'arraybuffer',
+        timeout: 30000, // 30 秒超时
+      });
+
+      const buffer = Buffer.from(response.data);
+      const base64 = buffer.toString('base64');
+      
+      // 返回 data URI 格式
+      const actualMimeType = response.headers['content-type'] || mimeType;
+      return `data:${actualMimeType};base64,${base64}`;
+    } catch (error) {
+      this.logger.error(`Failed to download image from ${imageUrl}: ${error.message}`);
+      throw new Error('Failed to download character photo');
+    }
   }
 
   /**

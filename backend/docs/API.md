@@ -384,7 +384,7 @@ Authorization: Bearer <JWT_TOKEN>
 
 **POST** `/v1/jobs`
 
-创建图片生成任务，会自动检查每日配额，并记录到本地数据库。
+创建图片生成任务，会自动检查每日配额，并记录到本地数据库。支持锁脸功能。
 
 **Headers：**
 ```
@@ -398,9 +398,32 @@ Authorization: Bearer <JWT_TOKEN>
   "negativePrompt": "ugly, blurry",
   "aspectRatio": "1:1",
   "resolution": "1024x1024",
-  "model": "默认模型"
+  "model": "默认模型",
+  "mode": "final",
+  "characterId": "optional-character-uuid",
+  "inputImage": "data:image/png;base64,iVBORw0KGgo..."
 }
 ```
+
+**参数说明：**
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| prompt | string | 是 | 生成提示词 |
+| negativePrompt | string | 否 | 负面提示词 |
+| aspectRatio | string | 否 | 宽高比，如 "1:1", "16:9" |
+| resolution | string | 否 | 分辨率，如 "1024x1024" |
+| model | string | 否 | 模型名称 |
+| mode | string | 否 | 生成模式，"draft" 或 "final"（默认） |
+| characterId | string | 否 | 角色 UUID，用于锁脸功能。传入后会自动获取角色照片作为参考图 |
+| inputImage | string | 否 | 直接传入参考图片，格式: `data:image/<type>;base64,<data>` |
+| params | object | 否 | 其他自定义参数 |
+
+**锁脸功能说明：**
+- 传入 `characterId` 时，系统会自动获取该角色的第一张照片作为参考图
+- 系统会自动添加锁脸指令到提示词，确保生成的图片保持一致的面部特征
+- 也可以直接传入 `inputImage` 字段，使用自定义的参考图片
+- 如果同时传入 `characterId` 和 `inputImage`，优先使用 `characterId` 关联的角色照片
 
 **响应：**
 ```json
@@ -416,6 +439,14 @@ Authorization: Bearer <JWT_TOKEN>
 {
   "statusCode": 403,
   "message": "Daily limit reached (20/20)"
+}
+```
+
+**错误响应（角色无照片）：**
+```json
+{
+  "statusCode": 400,
+  "message": "Selected character has no photos. Please upload photos first."
 }
 ```
 
