@@ -1,6 +1,7 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { RedisService } from '../../common/providers/redis.service';
+import axios from 'axios';
 
 // 阿里云 SMS SDK
 import Dysmsapi20170525, * as $Dysmsapi20170525 from '@alicloud/dysmsapi20170525';
@@ -26,7 +27,11 @@ export class SmsService {
   private readonly aliyunAccessKeySecret: string;
   private readonly aliyunSignName: string;
   private readonly aliyunTemplateCode: string;
-  private readonly smsMode: 'mock' | 'aliyun';
+  private readonly smsMode: 'mock' | 'aliyun' | 'proxy';
+
+  // Proxy 配置
+  private readonly proxyUrl: string;
+  private readonly proxyApiKey: string;
 
   constructor(
     private readonly configService: ConfigService,
@@ -38,6 +43,8 @@ export class SmsService {
     this.aliyunAccessKeySecret = config.aliyunAccessKeySecret || '';
     this.aliyunSignName = config.aliyunSignName || '';
     this.aliyunTemplateCode = config.aliyunTemplateCode || '';
+    this.proxyUrl = config.proxyUrl || '';
+    this.proxyApiKey = config.proxyApiKey || '';
 
     this.logger.log(`SMS Service initialized in ${this.smsMode} mode`);
   }
@@ -78,6 +85,8 @@ export class SmsService {
     // 根据模式发送短信
     if (this.smsMode === 'aliyun') {
       return await this.sendViaAliyun(phone, code);
+    } else if (this.smsMode === 'proxy') {
+      return await this.sendViaProxy(phone);
     } else {
       return this.sendViaMock(phone, code);
     }
@@ -96,6 +105,55 @@ export class SmsService {
       message: 'Verification code sent (mock mode)',
       code: isDev ? code : undefined, // 仅开发环境返回验证码
     };
+  }
+
+  /**
+   * 通过代理接口发送（中转到外部短信服务）
+   */
+  private async sendViaProxy(phone: string): Promise<SendSmsResult> {
+    try {
+      this.logger.log(`[PROXY SMS] Forwarding request to ${this.proxyUrl} for ${phone}`);
+      
+      const response = await axios.post(
+        this.proxyUrl,
+        { phone },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'X-API-Key': this.proxyApiKey,
+          },
+          timeout: 30000,
+        },
+      );
+
+      this.logger.log(`[PROXY SMS] Response: ${JSON.stringify(response.data)}`);
+
+      if (response.data && (response.data.success || response.status === 200 || response.status === 201)) {
+        return {
+          success: true,
+          message: response.data.message || 'Verification code sent',
+        };
+      } else {
+        throw new Error(response.data?.message || 'Proxy SMS send failed');
+      }
+    } catch (error) {
+      this.logger.error(`[PROXY SMS] Error: ${error.message}`);
+      
+      if (axios.isAxiosError(error)) {
+        const status = error.response?.status;
+        const data = error.response?.data;
+        this.logger.error(`[PROXY SMS] HTTP ${status}: ${JSON.stringify(data)}`);
+        
+        if (status === 429) {
+          throw new BadRequestException('Too many requests, please try again later');
+        }
+        if (status === 400) {
+          throw new BadRequestException(data?.message || 'Invalid request');
+        }
+      }
+      
+      throw new BadRequestException('Failed to send verification code, please try again later');
+    }
   }
 
   /**

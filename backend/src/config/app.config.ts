@@ -62,11 +62,13 @@ export default registerAs('app', (): Config => ({
 
   // 短信服务配置
   sms: {
-    mode: (process.env.SMS_MODE as 'mock' | 'aliyun') || 'mock',
+    mode: (process.env.SMS_MODE as 'mock' | 'aliyun' | 'proxy') || 'mock',
     aliyunAccessKeyId: process.env.ALIYUN_SMS_ACCESS_KEY_ID || '',
     aliyunAccessKeySecret: process.env.ALIYUN_SMS_ACCESS_KEY_SECRET || '',
     aliyunSignName: process.env.ALIYUN_SMS_SIGN_NAME || '',
     aliyunTemplateCode: process.env.ALIYUN_SMS_TEMPLATE_CODE || '',
+    proxyUrl: process.env.SMS_PROXY_URL || 'https://dream-api.newpai.cn/v1/auth/send-code',
+    proxyApiKey: process.env.SMS_PROXY_API_KEY || '',
   },
 
   cors: {

@@ -56,11 +56,13 @@ export interface Config {
   };
 
   sms: {
-    mode: 'mock' | 'aliyun';
+    mode: 'mock' | 'aliyun' | 'proxy';
     aliyunAccessKeyId: string;
     aliyunAccessKeySecret: string;
     aliyunSignName: string;
     aliyunTemplateCode: string;
+    proxyUrl: string;
+    proxyApiKey: string;
   };
 
   cors: {
