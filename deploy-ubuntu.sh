@@ -229,8 +229,15 @@ DAILY_LIMIT_NORMAL=10
 DAILY_LIMIT_VIP=50
 DAILY_LIMIT_SVIP=200
 
-# 阿里云短信
-SMS_MODE=aliyun
+# 短信服务配置
+# mode: mock | aliyun | proxy
+SMS_MODE=proxy
+
+# Proxy 模式配置（中转到外部短信服务）
+SMS_PROXY_URL=https://dream-api.newpai.cn/v1/auth/send-code
+SMS_PROXY_API_KEY=your_proxy_api_key
+
+# 阿里云短信配置（仅 SMS_MODE=aliyun 时需要）
 ALIYUN_SMS_ACCESS_KEY_ID=your_access_key
 ALIYUN_SMS_ACCESS_KEY_SECRET=your_secret
 ALIYUN_SMS_SIGN_NAME=your_sign
