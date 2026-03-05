@@ -12,7 +12,7 @@ export default registerAs('app', (): Config => ({
     username: process.env.DATABASE_USERNAME || 'postgres',
     password: process.env.DATABASE_PASSWORD || 'postgres',
     name: process.env.DATABASE_NAME || 'dream_wechat',
-    synchronize: process.env.NODE_ENV === 'development',
+    synchronize: process.env.DATABASE_SYNCHRONIZE === 'true' || process.env.NODE_ENV === 'development',
   },
 
   redis: {
