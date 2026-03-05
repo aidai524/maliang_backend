@@ -72,24 +72,34 @@ export class SmsService {
       throw new BadRequestException('Please wait 60 seconds before requesting another code');
     }
 
-    // 生成验证码
-    const code = this.generateCode();
+    // 根据模式发送短信
+    let result: SendSmsResult;
+    let code: string;
+    
+    if (this.smsMode === 'aliyun') {
+      // 阿里云模式：自己生成验证码
+      code = this.generateCode();
+      result = await this.sendViaAliyun(phone, code);
+    } else if (this.smsMode === 'proxy') {
+      // 代理模式：中转服务生成验证码并返回
+      result = await this.sendViaProxy(phone);
+      code = result.code || '';
+    } else {
+      // 模拟模式：自己生成验证码
+      code = this.generateCode();
+      result = this.sendViaMock(phone, code);
+    }
 
-    // 存储验证码到 Redis
-    const codeKey = `${this.codePrefix}${phone}`;
-    await this.redisService.setex(codeKey, this.codeTTL, code);
+    // 存储验证码到 Redis（仅在验证码存在时）
+    if (code) {
+      const codeKey = `${this.codePrefix}${phone}`;
+      await this.redisService.setex(codeKey, this.codeTTL, code);
+    }
 
     // 设置发送频率限制
     await this.redisService.setex(limitKey, this.sendLimitTTL, '1');
 
-    // 根据模式发送短信
-    if (this.smsMode === 'aliyun') {
-      return await this.sendViaAliyun(phone, code);
-    } else if (this.smsMode === 'proxy') {
-      return await this.sendViaProxy(phone);
-    } else {
-      return this.sendViaMock(phone, code);
-    }
+    return result;
   }
 
   /**
@@ -132,6 +142,7 @@ export class SmsService {
         return {
           success: true,
           message: response.data.message || 'Verification code sent',
+          code: response.data.code, // 从中转服务返回的验证码
         };
       } else {
         throw new Error(response.data?.message || 'Proxy SMS send failed');
