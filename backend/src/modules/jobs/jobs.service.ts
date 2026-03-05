@@ -9,7 +9,7 @@ import { CreateJobDto } from './dto/create-job.dto';
 import axios from 'axios';
 
 // 锁脸提示词前缀（英文，让 AI 更好理解）
-const FACE_LOCK_PROMPT_PREFIX = `Please reference the facial features from the following character image and generate an image that matches the requirements. Maintain consistent facial characteristics, face shape, and key features.
+const FACE_LOCK_PROMPT_PREFIX = `[CRITICAL FACE LOCK INSTRUCTION] You MUST preserve the EXACT facial features from the provided reference image. The generated image MUST use the SAME face with 100% accuracy - identical eyes, nose, mouth, jawline, cheekbones, and all facial proportions. This is a strict requirement, not a suggestion. Do NOT modify, alter, or generate a new face. The person in the output MUST be immediately recognizable as the same person from the reference image. Face shape, facial structure, and all features must match perfectly.
 
 Style requirement: `;
 
@@ -69,9 +69,6 @@ export class JobsService {
           inputImage = await this.downloadImageAsBase64(imageUrl, photo.mimeType);
           usedCharacterId = dto.characterId;
           
-          // 添加锁脸提示词前缀
-          finalPrompt = FACE_LOCK_PROMPT_PREFIX + dto.prompt;
-          
           this.logger.log(`Using character ${dto.characterId} photo for face lock`);
         }
       } catch (error) {
@@ -81,6 +78,12 @@ export class JobsService {
         this.logger.error(`Failed to get character photo: ${error.message}`);
         throw new BadRequestException('Failed to load character photo for face lock');
       }
+    }
+
+    // 如果有参考图片（无论是 characterId 还是直接传的 inputImage），都添加锁脸提示词
+    if (inputImage && !finalPrompt.includes(FACE_LOCK_PROMPT_PREFIX)) {
+      finalPrompt = FACE_LOCK_PROMPT_PREFIX + finalPrompt;
+      this.logger.log(`Adding face lock prompt prefix for inputImage`);
     }
 
     // 3. 调用第三方 API 创建任务

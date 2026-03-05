@@ -80,6 +80,23 @@ export class WechatAuthService {
       where: { openid: sessionData.openid },
     });
 
+    // 如果通过openid没找到，但有手机号，尝试通过手机号查找（兼容切换AppID的情况）
+    if (!user && phone) {
+      user = await this.userRepository.findOne({
+        where: { phone: phone },
+      });
+      
+      // 如果通过手机号找到了用户，更新openid和unionid到新的AppID
+      if (user) {
+        user.openid = sessionData.openid;
+        if (sessionData.unionid) {
+          user.unionid = sessionData.unionid;
+        }
+        await this.userRepository.save(user);
+        this.logger.log(`Updated user ${user.id} openid from old AppID to new AppID`);
+      }
+    }
+
     if (!user) {
       user = this.userRepository.create({
         openid: sessionData.openid,
