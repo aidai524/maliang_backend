@@ -55,7 +55,6 @@
       <button class="tab active" data-group="auth">认证</button>
       <button class="tab" data-group="user">用户</button>
       <button class="tab" data-group="jobs">生成任务</button>
-      <button class="tab" data-group="proxy">代理接口</button>
       <button class="tab" data-group="templates">模板</button>
       <button class="tab" data-group="characters">角色</button>
       <button class="tab" data-group="admin">管理</button>
@@ -192,12 +191,36 @@
           <span class="method POST">POST</span>
           <span class="path">/v1/jobs</span>
         </div>
-        <div class="desc">创建生成任务（自动检查配额）</div>
+        <div class="desc">创建生成任务（自动检查配额，支持锁脸、默认使用云雾API）</div>
         <div class="params">
-          <textarea id="create-job-body">{"prompt": "A cute cat", "aspectRatio": "1:1"}</textarea>
+          <textarea id="create-job-body">{
+  "prompt": "A beautiful sunset over the ocean",
+  "mode": "final",
+  "resolution": "2K",
+  "aspectRatio": "1:1"
+}</textarea>
           <button class="btn" onclick="callApi('POST', '/v1/jobs', 'create-job-body', 'create-job-resp', true)">创建</button>
         </div>
         <div class="response" id="create-job-resp"></div>
+      </div>
+
+      <div class="api-item">
+        <div class="api-header">
+          <span class="method POST">POST</span>
+          <span class="path">/v1/jobs (with face-lock)</span>
+        </div>
+        <div class="desc">创建锁脸任务（需要先创建角色并上传照片）</div>
+        <div class="params">
+          <textarea id="create-job-facelock-body">{
+  "prompt": "A portrait photo with professional lighting",
+  "mode": "final",
+  "resolution": "2K",
+  "aspectRatio": "1:1",
+  "characterId": 1
+}</textarea>
+          <button class="btn" onclick="callApi('POST', '/v1/jobs', 'create-job-facelock-body', 'create-job-facelock-resp', true)">创建</button>
+        </div>
+        <div class="response" id="create-job-facelock-resp"></div>
       </div>
 
       <div class="api-item">
@@ -211,50 +234,6 @@
           <button class="btn" onclick="callApiWithQuery('GET', '/v1/jobs', 'jobs-list-params', 'jobs-list-resp', true)">获取</button>
         </div>
         <div class="response" id="jobs-list-resp"></div>
-      </div>
-    </div>
-
-    <!-- 代理模块 -->
-    <div class="api-group hidden" data-group="proxy">
-      <h3>🔄 代理模块（第三方 AI 服务）</h3>
-      
-      <div class="api-item">
-        <div class="api-header">
-          <span class="method POST">POST</span>
-          <span class="path">/v1/proxy/images/generate</span>
-        </div>
-        <div class="desc">生成图片（代理到第三方服务）</div>
-        <div class="params">
-          <textarea id="proxy-generate-body">{"prompt": "A beautiful sunset", "mode": "final"}</textarea>
-          <button class="btn" onclick="callApi('POST', '/v1/proxy/images/generate', 'proxy-generate-body', 'proxy-generate-resp', true)">生成</button>
-        </div>
-        <div class="response" id="proxy-generate-resp"></div>
-      </div>
-
-      <div class="api-item">
-        <div class="api-header">
-          <span class="method GET">GET</span>
-          <span class="path">/v1/proxy/jobs</span>
-        </div>
-        <div class="desc">获取任务列表（第三方）</div>
-        <div class="params">
-          <input type="text" id="proxy-jobs-params" value="limit=10" placeholder="查询参数">
-          <button class="btn" onclick="callApiWithQuery('GET', '/v1/proxy/jobs', 'proxy-jobs-params', 'proxy-jobs-resp', true)">获取</button>
-        </div>
-        <div class="response" id="proxy-jobs-resp"></div>
-      </div>
-
-      <div class="api-item">
-        <div class="api-header">
-          <span class="method GET">GET</span>
-          <span class="path">/v1/proxy/jobs/:jobId</span>
-        </div>
-        <div class="desc">获取任务详情</div>
-        <div class="params">
-          <input type="text" id="proxy-job-id" placeholder="Job ID">
-          <button class="btn" onclick="callApiWithPath('GET', '/v1/proxy/jobs/', 'proxy-job-id', 'proxy-job-resp', true)">获取</button>
-        </div>
-        <div class="response" id="proxy-job-resp"></div>
       </div>
     </div>
 

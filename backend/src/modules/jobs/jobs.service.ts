@@ -94,6 +94,7 @@ export class JobsService {
       aspect_ratio: dto.aspectRatio,
       resolution: dto.resolution,
       mode: dto.mode || 'final',
+      endpoint: 'yunwu', // 默认使用云雾API（更稳定）
       ...dto.params,
     };
 
@@ -101,6 +102,9 @@ export class JobsService {
     if (inputImage) {
       requestBody.inputImage = inputImage;
     }
+
+    // 记录发送到第三方API的请求（用于调试）
+    this.logger.log(`Sending to third-party API - endpoint: ${requestBody.endpoint}, resolution: ${requestBody.resolution}, aspectRatio: ${requestBody.aspect_ratio}`);
 
     let thirdPartyResponse: any;
     try {
@@ -115,7 +119,7 @@ export class JobsService {
     }
 
     // 4. 记录到数据库
-    const jobId = thirdPartyResponse?.id || thirdPartyResponse?.job_id;
+    const jobId = thirdPartyResponse?.jobId || thirdPartyResponse?.id || thirdPartyResponse?.job_id;
     
     const generation = await this.generationsService.createGeneration(
       userId,
@@ -201,8 +205,9 @@ export class JobsService {
       const status = this.mapStatus(thirdPartyResponse.status);
       const updates: Partial<Generation> = { status };
 
-      if (thirdPartyResponse.output?.image_url) {
-        updates.imageUrl = thirdPartyResponse.output.image_url;
+      // 处理图片URL（第三方API返回的是resultUrls数组）
+      if (thirdPartyResponse.resultUrls && thirdPartyResponse.resultUrls.length > 0) {
+        updates.imageUrl = thirdPartyResponse.resultUrls[0];
       }
       if (thirdPartyResponse.output?.thumbnail_url) {
         updates.thumbnailUrl = thirdPartyResponse.output.thumbnail_url;
@@ -258,11 +263,14 @@ export class JobsService {
   private mapStatus(thirdPartyStatus: string): GenerationStatus {
     const statusMap: Record<string, GenerationStatus> = {
       pending: GenerationStatus.PENDING,
+      queued: GenerationStatus.PENDING,
+      running: GenerationStatus.PROCESSING,
       processing: GenerationStatus.PROCESSING,
       completed: GenerationStatus.COMPLETED,
       succeeded: GenerationStatus.COMPLETED,
       failed: GenerationStatus.FAILED,
       cancelled: GenerationStatus.FAILED,
+      retrying: GenerationStatus.PROCESSING,
     };
     return statusMap[thirdPartyStatus?.toLowerCase()] || GenerationStatus.PENDING;
   }

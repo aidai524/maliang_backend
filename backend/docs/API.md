@@ -61,16 +61,6 @@ X-Admin-Key: <ADMIN_API_KEY>
 | GET | `/v1/jobs/:jobId` | 获取任务详情 | JWT |
 | DELETE | `/v1/jobs/:jobId` | 取消任务 | JWT |
 
-### 代理模块 (Proxy) - 第三方 AI 服务
-
-| 方法 | 路径 | 说明 | 认证 |
-|------|------|------|------|
-| POST | `/v1/proxy/images/generate` | 生成图片 | JWT |
-| GET | `/v1/proxy/jobs` | 获取任务列表 | JWT |
-| GET | `/v1/proxy/jobs/:jobId` | 获取任务详情 | JWT |
-| DELETE | `/v1/proxy/jobs/:jobId` | 取消任务 | JWT |
-
-### VIP 模块 (VIP)
 
 | 方法 | 路径 | 说明 | 认证 |
 |------|------|------|------|
@@ -386,7 +376,74 @@ Authorization: Bearer <JWT_TOKEN>
 
 创建图片生成任务，会自动检查每日配额，并记录到本地数据库。支持锁脸功能。
 
+**默认配置:**
+- 稡型: gemini-3-pro-image-preview
+- 端点: yunwu (云雾API，更稳定)
+- 模式: final (高质量)
+
 **Headers：**
+```
+Authorization: Bearer <JWT_TOKEN>
+```
+
+**请求体：**
+```json
+{
+  "prompt": "A cute cat sitting on a couch",
+  "negativePrompt": "ugly, blurry",
+  "aspectRatio": "1:1",
+  "resolution": "2K",
+  "mode": "final",
+  "characterId": "1",
+  "params": {
+    "endpoint": "yunwu",
+    "customParam": "value"
+  }
+}
+```
+
+**参数说明：**
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| prompt | string | 是 | 生成提示词 |
+| negativePrompt | string | 否 | 负面提示词 |
+| aspectRatio | string | 否 | 宽高比，如 "1:1", "16:9", "9:16"。默认 "1:1" |
+| resolution | string | 否 | 分辨率，如 "1K", "2K", "4K"。默认 "2K" |
+| mode | string | 否 | 生成模式，"draft" 或 "final"。默认 "final" |
+| characterId | string/number | 否 | 角色 ID，用于锁脸功能。传入后会自动获取角色照片作为参考图 |
+| inputImage | string | 否 | 直接传入参考图片，格式: `data:image/<type>;base64,<data>` |
+| params | object | 否 | 其他自定义参数（如 endpoint: "yunwu" 或 "official"） |
+
+**锁脸功能说明:**
+- 传入 `characterId` 时，系统会自动获取该角色的第一张照片作为参考图
+- 系统会自动添加锁脸指令到提示词，确保生成的图片保持一致的面部特征
+- 也可以直接传入 `inputImage` 字段，使用自定义的参考图片
+- 同时传入 `characterId` 和 `inputImage` 时，优先使用 `characterId`
+
+**响应：**
+```json
+{
+  "jobId": "cmkuz35wf00034rk15ycgzvce",
+  "status": "QUEUED",
+  "generationId": 123
+}
+```
+
+**错误响应（配额不足）：**
+```json
+{
+  "statusCode": 403,
+  "message": "Daily generation quota exceeded. Please upgrade to VIP for more generations."
+}
+````
+
+**错误响应（角色无照片）：**
+```json
+{
+  "statusCode": 400,
+  "message": "Selected character has no photos. Please upload photos first."
+}
 ```
 Authorization: Bearer <JWT_TOKEN>
 ```
@@ -452,97 +509,6 @@ Authorization: Bearer <JWT_TOKEN>
 
 ---
 
-### 生成图片（代理到第三方）
-
-**POST** `/v1/proxy/images/generate`
-
-代理到第三方 AI 服务生成图片，支持锁脸功能。
-
-**Headers：**
-```
-Authorization: Bearer <JWT_TOKEN>
-```
-
-**请求体：**
-```json
-{
-  "prompt": "A beautiful sunset over mountains",
-  "mode": "final",
-  "resolution": "2K",
-  "aspectRatio": "16:9",
-  "characterId": "optional-character-uuid",
-  "inputImage": "data:image/png;base64,iVBORw0KGgo..."
-}
-```
-
-**参数说明：**
-
-| 参数 | 类型 | 必填 | 说明 |
-|------|------|------|------|
-| prompt | string | 是 | 生成提示词 |
-| mode | string | 否 | 生成模式，"draft" 或 "final" |
-| resolution | string | 否 | 分辨率，如 "2K", "4K" |
-| aspectRatio | string | 否 | 宽高比，如 "16:9", "1:1" |
-| characterId | string | 否 | 角色 UUID，用于锁脸功能。传入后会自动获取角色照片作为参考图 |
-| inputImage | string | 否 | 直接传入参考图片，格式: `data:image/<type>;base64,<data>` |
-
-**锁脸功能说明：**
-- 传入 `characterId` 时，系统会自动获取该角色的第一张照片作为参考图
-- 系统会自动添加锁脸指令到提示词，确保生成的图片保持一致的面部特征
-- 也可以直接传入 `inputImage` 字段，使用自定义的参考图片
-
-**响应：**
-```json
-{
-  "jobId": "cmkuz35wf00034rk15ycgzvce",
-  "status": "QUEUED"
-}
-```
-
-**错误响应（角色无照片）：**
-```json
-{
-  "statusCode": 400,
-  "message": "Selected character has no photos. Please upload photos first."
-}
-```
-
----
-
-### 获取任务列表（代理）
-
-**GET** `/v1/proxy/jobs`
-
-**Headers：**
-```
-Authorization: Bearer <JWT_TOKEN>
-```
-
-**Query 参数：**
-- `limit` - 每页数量（默认 20）
-- `cursor` - 分页游标
-
-**响应：**
-```json
-{
-  "items": [
-    {
-      "id": "cmkuz35wf00034rk15ycgzvce",
-      "status": "SUCCEEDED",
-      "prompt": "A cute cat",
-      "mode": "final",
-      "resultUrls": ["https://assets.xxx.com/xxx.png"],
-      "createdAt": "2026-02-04T07:15:39.632Z"
-    }
-  ],
-  "nextCursor": "xxx",
-  "hasMore": true
-}
-```
-
----
-
-### 创建角色
 
 **POST** `/v1/characters`
 

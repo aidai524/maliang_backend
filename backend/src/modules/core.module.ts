@@ -9,7 +9,6 @@ import { AuthController } from './auth/auth.controller';
 import { UsersController } from './users/users.controller';
 import { VipController } from './vip/vip.controller';
 import { OrdersController } from './orders/orders.controller';
-import { ProxyController } from './proxy/proxy.controller';
 import { FavoritesController } from './favorites/favorites.controller';
 import { GalleryController } from './gallery/gallery.controller';
 import { PointsController } from './points/points.controller';
@@ -28,7 +27,6 @@ import { SmsService } from './auth/sms.service';
 import { UsersService } from './users/users.service';
 import { VipService } from './vip/vip.service';
 import { OrdersService } from './orders/orders.service';
-import { ProxyService } from './proxy/proxy.service';
 import { FavoritesService } from './favorites/favorites.service';
 import { GalleryService } from './gallery/gallery.service';
 import { PointsService } from './points/points.service';
@@ -98,7 +96,6 @@ import { Generation } from './generations/entities/generation.entity';
     UsersController,
     VipController,
     OrdersController,
-    ProxyController,
     FavoritesController,
     GalleryController,
     PointsController,
@@ -123,7 +120,6 @@ import { Generation } from './generations/entities/generation.entity';
     UsersService,
     VipService,
     OrdersService,
-    ProxyService,
     FavoritesService,
     GalleryService,
     PointsService,
