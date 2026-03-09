@@ -33,6 +33,12 @@ export class Generation {
   @Column({ name: 'prompt', type: 'text' })
   prompt: string;
 
+  @Column({ name: 'template_title', length: 255, nullable: true })
+  templateTitle: string;
+
+  @Column({ name: 'template_description', type: 'text', nullable: true })
+  templateDescription: string;
+
   @Column({ name: 'image_url', type: 'text', nullable: true })
   imageUrl: string;
 

@@ -24,6 +24,15 @@ export class CreateJobDto {
   @IsString()
   mode?: string;
 
+  // 模板信息
+  @IsOptional()
+  @IsString()
+  templateTitle?: string;
+
+  @IsOptional()
+  @IsString()
+  templateDescription?: string;
+
   // 角色 ID 或 UUID，用于锁脸功能（支持数字 ID 或字符串 UUID）
   @IsOptional()
   characterId?: string | number;

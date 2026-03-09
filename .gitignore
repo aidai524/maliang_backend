@@ -34,3 +34,6 @@ sleep
 .vscode/
 *.swp
 *.swo
+
+# API Keys (sensitive)
+docs/api-keys/*.txt

@@ -142,6 +142,8 @@ export class GenerationsService {
     prompt: string,
     jobId?: string,
     params?: Record<string, any>,
+    templateTitle?: string,
+    templateDescription?: string,
   ): Promise<Generation> {
     // 检查是否可以生成
     const { canGenerate, reason } = await this.canGenerate(userId);
@@ -154,6 +156,8 @@ export class GenerationsService {
       prompt,
       jobId,
       params,
+      templateTitle,
+      templateDescription,
       status: GenerationStatus.PENDING,
     });
 

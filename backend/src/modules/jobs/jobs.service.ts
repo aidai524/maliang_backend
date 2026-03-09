@@ -134,6 +134,8 @@ export class JobsService {
         characterId: usedCharacterId,
         ...dto.params,
       },
+      dto.templateTitle,
+      dto.templateDescription,
     );
 
     this.logger.log(`Created job ${jobId} for user ${userId}, generation ID: ${generation.id}${usedCharacterId ? `, character: ${usedCharacterId}` : ''}`);
@@ -282,7 +284,8 @@ export class JobsService {
     return {
       id: gen.id,
       jobId: gen.jobId,
-      prompt: gen.prompt,
+      templateTitle: gen.templateTitle,
+      templateDescription: gen.templateDescription,
       status: gen.status,
       imageUrl: gen.imageUrl,
       thumbnailUrl: gen.thumbnailUrl,
