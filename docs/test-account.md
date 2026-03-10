@@ -7,6 +7,9 @@
 - **用户ID**: 6
 - **手机号**: 13800000000
 - **昵称**: 测试账号
+- **VIP等级**: SVIP（10年有效期至 2036-03-10）
+- **每日额度**: 100 次/天
+- **当前状态**: 每天重置，足够开发测试使用
 
 ## JWT Token
 
@@ -31,6 +34,13 @@ curl -X POST https://dream-api.newpai.cn/v1/jobs \
 
 ```bash
 curl -X GET "https://dream-api.newpai.cn/v1/jobs?page=1&limit=10" \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImlhdCI6MTc3MzA2NzkxOSwiZXhwIjoxODA0NjAzOTE5fQ.nJcFVIoGRTevgAwWLjMAFzznKWGzlcruEAZavQCy-oA"
+```
+
+### 查询配额
+
+```bash
+curl -X GET "https://dream-api.newpai.cn/v1/jobs/quota" \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjYsImlhdCI6MTc3MzA2NzkxOSwiZXhwIjoxODA0NjAzOTE5fQ.nJcFVIoGRTevgAwWLjMAFzznKWGzlcruEAZavQCy-oA"
 ```
 
