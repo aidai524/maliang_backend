@@ -289,6 +289,9 @@ export class JobsService {
       status: gen.status,
       imageUrl: gen.imageUrl,
       thumbnailUrl: gen.thumbnailUrl,
+      mode: gen.params?.mode,
+      resolution: gen.params?.resolution,
+      aspectRatio: gen.params?.aspectRatio,
       createdAt: gen.createdAt,
       completedAt: gen.completedAt,
     };
