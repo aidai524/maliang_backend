@@ -219,6 +219,15 @@ export class GenerationsService {
   }
 
   /**
+   * 根据 jobId 查找生成记录
+   */
+  async findByJobId(jobId: string): Promise<Generation | null> {
+    return await this.generationRepository.findOne({
+      where: { jobId },
+    });
+  }
+
+  /**
    * 获取用户的生成历史
    */
   async getUserGenerations(

@@ -221,7 +221,31 @@ export class JobsService {
       await this.generationsService.updateGenerationByJobId(jobId, updates);
     }
 
-    return thirdPartyResponse;
+    // 获取本地完整记录
+    const generation = await this.generationsService.findByJobId(jobId);
+    if (!generation) {
+      return thirdPartyResponse;
+    }
+
+    // 返回合并后的完整信息
+    return {
+      id: generation.id,
+      jobId: generation.jobId,
+      templateTitle: generation.templateTitle,
+      templateDescription: generation.templateDescription,
+      status: generation.status,
+      imageUrl: generation.imageUrl,
+      thumbnailUrl: generation.thumbnailUrl,
+      mode: generation.params?.mode,
+      resolution: generation.params?.resolution,
+      aspectRatio: generation.params?.aspectRatio,
+      characterId: generation.params?.characterId,
+      createdAt: generation.createdAt,
+      completedAt: generation.completedAt,
+      error: generation.errorMessage,
+      // 保留第三方 API 的原始响应
+      thirdPartyResponse,
+    };
   }
 
   /**

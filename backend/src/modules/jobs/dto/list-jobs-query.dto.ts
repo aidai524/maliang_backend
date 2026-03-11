@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsIn } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class ListJobsQueryDto {
   @IsOptional()
@@ -18,10 +18,10 @@ export class ListJobsQueryDto {
   characterId?: string;
 
   @IsOptional()
-  @IsDateString()
+  @IsString()
   createdAfter?: string;
 
   @IsOptional()
-  @IsDateString()
+  @IsString()
   createdBefore?: string;
 }
