@@ -476,6 +476,59 @@ curl -X POST https://dream-api.newpai.cn/v1/auth/phone-login \
 }
 ```
 
+### 2. 服务端点通过 params 指定
+
+```bash
+✅ 正确:
+"params": {"endpoint": "yunwu"}
+
+❌ 错误:
+"service": "yunwu"
+"endpoint": "yunwu"  # 应该在 params 里
+```
+
+### 3. 参考图片使用 inputImage
+
+```bash
+✅ 正确:
+"inputImage": "data:image/jpeg;base64,..."
+
+❌ 错误:
+"referenceImage": "..."
+"initImage": "..."
+"image": "..."
+```
+
+### 4. 没有 Stable Diffusion 相关参数
+
+```bash
+❌ 不支持:
+"width": 1024          # 用 aspectRatio + resolution
+"height": 1024
+"seed": 12345
+"steps": 30
+"cfgScale": 7.5
+"sampler": "Euler"
+```
+
+### 5. 获取 JWT Token
+
+```bash
+# 先登录获取 Token
+curl -X POST https://dream-api.newpai.cn/v1/auth/phone-login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "phone": "13800138000",
+    "code": "123456"
+  }'
+
+# 返回
+{
+  "token": "eyJhbGciOiJIUzI1NiIs...",
+  "user": {...}
+}
+```
+
 ---
 
 ## 🔗 相关文档
